@@ -1,30 +1,29 @@
-# ─────────────────────────────────────────────────────────────
-# FruitBox Makefile
-#   빌드: make
-#   실행: make run
-#   정리: make clean
-# ─────────────────────────────────────────────────────────────
-
-CC      = gcc
-CFLAGS  = -Wall -Wextra -g -Iinclude
+# Compiler Setting
+CC = gcc
+# Compile Option(debugging, warning, header file)
+CFLAGS = -Wall -g -I./include
+# Link Option(ncurses library, phtread library)
 LDFLAGS = -lncurses -lpthread
 
-TARGET  = fruitbox
-SRC     = src/main.c src/board.c src/ui.c
-OBJ     = $(SRC:.c=.o)
+#Name Of Target Action
+TARGET = fruitbox
 
-.PHONY: all clean run
+#Source File & Object File List
+SRCS = $(wildcard src/*.c)
+OBJS = $(SRCS:.c=.o)
 
+#Basic Rule Of Build
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-src/%.o: src/%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+# Convert .c File To .o File
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-run: all
-	./$(TARGET)
-
+# Clean File
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f src/*.o $(TARGET)
+
+.PHONY: all clean
