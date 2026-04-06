@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FruitBox</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 스타트 화면 -->
+    <div id="start-screen">
+        <div class="start-box">
+            <h1>🍎 FruitBox</h1>
+            <p class="subtitle">합이 <span class="highlight">10의 배수</span>가 되도록 사과를 드래그해서 제거하세요!</p>
+            <div class="rules">
+                <div class="rule-item">🖱️ 마우스 드래그로 영역 선택</div>
+                <div class="rule-item">🎯 선택 영역의 합 = 10, 20, 30... 이면 제거</div>
+                <div class="rule-item">💣 폭탄: 인접 4칸 추가 제거</div>
+                <div class="rule-item">⏱️ 시계: 시간 +5초</div>
+            </div>
+            <button id="start-btn">게임 시작</button>
+        </div>
+    </div>
+
+    <!-- 게임 화면 -->
+    <div id="game-screen" class="hidden">
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-left">
+                <span id="score-display">SCORE: 0</span>
+                <span id="best-display">BEST: 0</span>
+            </div>
+            <div class="hud-center">
+                <span id="timer-display">TIME: 120</span>
+            </div>
+            <div class="hud-right">
+                <button id="hint-btn" class="item-btn">🔍 힌트 <span id="hint-count">x2</span></button>
+                <button id="change-btn" class="item-btn">🔢 변환 <span id="change-count">x2</span></button>
+                <button id="pause-btn">⏸ 일시정지</button>
+                <button id="reset-btn">🔄 리셋</button>
+            </div>
+        </div>
+
+        <!-- 게임 캔버스 -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 선택 합계 표시 (보드 아래) -->
+        <div id="sum-display" class="hidden">합계: <span id="sum-value">0</span> / 10</div>
+
+        <!-- 일시정지 오버레이 -->
+        <div id="pause-overlay" class="hidden">
+            <div class="overlay-box">
+                <h2>⏸ 일시정지</h2>
+                <button id="resume-btn">재개</button>
+            </div>
+        </div>
+
+        <!-- 숫자 변환 모드 안내 -->
+        <div id="change-mode-banner" class="hidden">
+            🔢 변환할 사과를 클릭하세요
+        </div>
+    </div>
+
+    <!-- 게임 오버 화면 -->
+    <div id="gameover-screen" class="hidden">
+        <div class="gameover-box">
+            <h2>GAME OVER</h2>
+            <p>SCORE: <span id="final-score">0</span></p>
+            <p>BEST: <span id="final-best">0</span></p>
+            <button id="restart-btn">다시 시작</button>
+            <button id="home-btn">처음으로</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
