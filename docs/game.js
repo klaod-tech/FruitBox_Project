@@ -12,9 +12,9 @@
 /* ─────────────────────────────────────
  * 캔버스 & 셀 크기 설정
  * ───────────────────────────────────── */
-const ROWS = 15;
-const COLS = 20;
-const CELL = 46;   /* 셀 크기 (px) */
+const ROWS = 10;
+const COLS = 17;
+const CELL = 50;   /* 셀 크기 (px) */
 const PAD  = 4;    /* 셀 내부 여백 */
 
 const canvas  = document.getElementById('game-canvas');

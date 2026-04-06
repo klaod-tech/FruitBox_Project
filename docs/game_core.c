@@ -15,8 +15,8 @@
 /* ─────────────────────────────────────
  * 게임 상수
  * ───────────────────────────────────── */
-#define BOARD_ROWS      15
-#define BOARD_COLS      20
+#define BOARD_ROWS      10
+#define BOARD_COLS      17
 #define TARGET_SUM      10
 #define GAME_TIME       120
 #define SCORE_PER_APPLE 1
