@@ -6,29 +6,35 @@
 
 ### 1. Ubuntu 터미널 열기
 
-- Windows 시작 메뉴에서 **Ubuntu** 검색 후 실행
-- 또는 `Win + R` → `wsl` 입력 후 Enter
+- Ubuntu 앱 실행 또는 VS Code 터미널에서 Ubuntu 선택
 
-### 2. ncurses 라이브러리 설치
+### 2. 저장소 클론 (처음 한 번만)
+
+```bash
+git clone https://github.com/klaod-tech/FruitBox_Project.git
+cd FruitBox_Project
+```
+
+> 이미 클론된 경우 생략하고 프로젝트 폴더로 이동하세요.
+
+### 3. ncurses 라이브러리 설치 (처음 한 번만)
 
 ```bash
 sudo apt-get update
 sudo apt-get install libncurses5-dev libncursesw5-dev
 ```
 
-> 이미 설치된 경우 생략 가능합니다.
-
 ---
 
 ## 빌드 및 실행
 
-### 3. 프로젝트 폴더로 이동
+### 4. 프로젝트 폴더로 이동
 
 ```bash
-cd /mnt/c/Users/dai52/.vscode/C_Project/FruitBox_Project
+cd ~/FruitBox_Project
 ```
 
-### 4. 빌드
+### 5. 빌드
 
 ```bash
 make
@@ -36,13 +42,7 @@ make
 
 성공 시 `fruitbox` 실행 파일이 생성됩니다.
 
-### 5. 실행
-
-```bash
-make run
-```
-
-또는 직접 실행:
+### 6. 실행
 
 ```bash
 ./fruitbox
@@ -55,13 +55,18 @@ make run
 화면이 잘리는 경우 터미널을 **72열 × 27줄 이상**으로 늘려주세요.
 
 ```bash
-# GNOME Terminal에서 크기 지정 후 실행
-gnome-terminal --geometry=80x30 -- bash -c "cd /mnt/c/Users/dai52/.vscode/C_Project/FruitBox_Project && ./fruitbox; exec bash"
+gnome-terminal --geometry=80x30 -- bash -c "cd ~/FruitBox_Project && ./fruitbox; exec bash"
 ```
 
 ---
 
-## 재빌드 / 초기화
+## 최신 코드 받기
+
+```bash
+git pull origin master
+```
+
+## 재빌드
 
 소스 수정 후 다시 빌드하려면:
 
@@ -89,5 +94,4 @@ make
 | 명령 | 동작 |
 |------|------|
 | `make` | 빌드 (fruitbox 생성) |
-| `make run` | 빌드 후 즉시 실행 |
 | `make clean` | 빌드 산출물 삭제 |
