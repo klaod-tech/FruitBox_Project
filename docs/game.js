@@ -12,9 +12,9 @@
 /* ─────────────────────────────────────
  * 캔버스 & 셀 크기 설정
  * ───────────────────────────────────── */
-const ROWS = 10;
-const COLS = 17;
-const CELL = 50;   /* 셀 크기 (px) */
+const ROWS = 15;
+const COLS = 20;
+const CELL = 46;   /* 셀 크기 (px) */
 const PAD  = 4;    /* 셀 내부 여백 */
 
 const canvas  = document.getElementById('game-canvas');
@@ -158,7 +158,7 @@ function buildMock() {
             if (fn === 'remove_region') {
                 const [r1,c1,r2,c2] = args;
                 const s = sumRegion(r1,c1,r2,c2);
-                if (s <= 0 || s % 10 !== 0) return 0;
+                if (s !== 10) return 0;
                 const removedCells = [];
                 for (let r=Math.min(r1,r2); r<=Math.max(r1,r2); r++)
                     for (let c=Math.min(c1,c2); c<=Math.max(c1,c2); c++) {
@@ -331,7 +331,7 @@ function updateHud() {
     if (drag.active) {
         const s = C.sumRegion(drag.r1, drag.c1, drag.r2, drag.c2);
         sumEl.classList.remove('hidden');
-        sumEl.classList.toggle('match', s > 0 && s % 10 === 0);
+        sumEl.classList.toggle('match', s === 10);
         document.getElementById('sum-value').textContent = s;
     } else {
         sumEl.classList.add('hidden');
