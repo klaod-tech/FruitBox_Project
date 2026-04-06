@@ -268,7 +268,24 @@ button:active { transform: scale(0.96); }
     text-align: center;
     box-shadow: 0 0 30px rgba(79,195,247,0.3);
 }
-.overlay-box h2 { font-size: 1.8rem; margin-bottom: 20px; color: #4fc3f7; }
+.overlay-box h2 { font-size: 1.8rem; margin-bottom: 12px; color: #4fc3f7; }
+
+.pause-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+#pause-count-display {
+    font-size: 0.95rem;
+    color: #f5a623;
+}
+#pause-time-display {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #e94560;
+}
 
 #resume-btn {
     background: #4fc3f7;

@@ -530,6 +530,19 @@ function resumeGame() {
     document.getElementById('pause-btn').textContent = '⏸ 일시정지';
 }
 
+function updatePauseOverlay(remain) {
+    const info = document.getElementById('pause-info');
+    if (difficulty === 'normal') {
+        info.classList.remove('hidden');
+        document.getElementById('pause-count-display').textContent =
+            `남은 횟수: ${5 - pauseCount}회`;
+        document.getElementById('pause-time-display').textContent =
+            remain !== null ? `남은 시간: ${remain}초` : '';
+    } else {
+        info.classList.add('hidden');
+    }
+}
+
 document.getElementById('pause-btn').addEventListener('click', () => {
     if (difficulty === 'hard') return;  /* 어려움: 일시정지 불가 */
 
@@ -541,16 +554,21 @@ document.getElementById('pause-btn').addEventListener('click', () => {
             if (pauseCount >= 5) return;  /* 5회 초과 불가 */
             pauseCount++;
             pauseSeconds = 0;
+            updatePauseOverlay(10);
             /* 10초 후 자동 재개 */
             pauseTimer = setInterval(() => {
                 pauseSeconds++;
                 const remain = 10 - pauseSeconds;
-                document.getElementById('pause-btn').textContent = `▶ 재개 (${remain}s)`;
+                document.getElementById('pause-time-display').textContent =
+                    `남은 시간: ${remain}초`;
+                document.getElementById('pause-btn').textContent =
+                    `▶ 재개 (${remain}s) [${pauseCount}/5]`;
                 if (remain <= 0) resumeGame();
             }, 1000);
             document.getElementById('pause-btn').textContent =
                 `▶ 재개 (10s) [${pauseCount}/5]`;
         } else {
+            updatePauseOverlay(null);
             document.getElementById('pause-btn').textContent = '▶ 재개';
         }
         C.pause();
