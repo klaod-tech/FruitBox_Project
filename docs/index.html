@@ -16,9 +16,19 @@
             <div class="rules">
                 <div class="rule-item">🖱️ 마우스 드래그로 영역 선택</div>
                 <div class="rule-item">🎯 선택 영역의 합 = 10 이면 제거</div>
-                <div class="rule-item">💣 폭탄: 인접 4칸 추가 제거</div>
-                <div class="rule-item">⏱️ 시계: 시간 +5초</div>
+                <div class="rule-item">💣 폭탄: 클릭 시 인접 4칸 제거</div>
+                <div class="rule-item">⏱️ 시계: 클릭 시 시간 +5초</div>
             </div>
+
+            <!-- 난이도 선택 -->
+            <div class="difficulty-label">난이도 선택</div>
+            <div class="difficulty-btns">
+                <button class="diff-btn active" data-diff="easy">🟢 쉬움</button>
+                <button class="diff-btn" data-diff="normal">🟡 보통</button>
+                <button class="diff-btn" data-diff="hard">🔴 어려움</button>
+            </div>
+            <div id="diff-desc" class="diff-desc">일시정지 제한 없음</div>
+
             <button id="start-btn">게임 시작</button>
         </div>
     </div>
@@ -39,6 +49,7 @@
                 <button id="change-btn" class="item-btn">🔢 변환 <span id="change-count">x2</span></button>
                 <button id="pause-btn">⏸ 일시정지</button>
                 <button id="reset-btn">🔄 리셋</button>
+                <button id="hud-home-btn">🏠</button>
             </div>
         </div>
 

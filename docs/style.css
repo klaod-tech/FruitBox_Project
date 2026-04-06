@@ -57,6 +57,39 @@ body {
 
 .highlight { color: #f5a623; font-weight: bold; }
 
+/* 난이도 선택 */
+.difficulty-label {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 8px;
+    text-align: left;
+}
+.difficulty-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.diff-btn {
+    flex: 1;
+    padding: 8px 0;
+    background: #0f3460;
+    color: #ccc;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.diff-btn:hover  { border-color: #4fc3f7; color: #fff; }
+.diff-btn.active { border-color: #f5a623; color: #f5a623; background: #1a3a60; }
+.diff-desc {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 20px;
+    text-align: center;
+    min-height: 18px;
+}
+
 .rules {
     background: #0f3460;
     border-radius: 10px;
@@ -167,8 +200,9 @@ button:active { transform: scale(0.96); }
 }
 .item-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-#pause-btn  { background: #2d6a4f; color: #d8f3dc; }
-#reset-btn  { background: #5c3317; color: #ffd6a5; }
+#pause-btn    { background: #2d6a4f; color: #d8f3dc; }
+#reset-btn    { background: #5c3317; color: #ffd6a5; }
+#hud-home-btn { background: #3a3a5c; color: #aaa; font-size: 1rem; padding: 6px 10px; }
 
 /* ─────────────────────────────────────
  * 선택 합계 표시

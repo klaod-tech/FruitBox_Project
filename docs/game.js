@@ -50,6 +50,23 @@ let drag = { active: false, r1: 0, c1: 0, r2: 0, c2: 0 };
 let changeMode = false;
 
 /* ─────────────────────────────────────
+ * 난이도 설정
+ *   easy   : 일시정지 제한 없음
+ *   normal : 일시정지 최대 5회, 1회당 10초 제한
+ *   hard   : 일시정지 버튼 비활성화
+ * ───────────────────────────────────── */
+let difficulty    = 'easy';
+let pauseCount    = 0;     /* normal 모드: 사용 횟수 */
+let pauseTimer    = null;  /* normal 모드: 일시정지 제한 타이머 */
+let pauseSeconds  = 0;     /* normal 모드: 현재 일시정지 경과 초 */
+
+const DIFF_DESC = {
+    easy:   '일시정지 제한 없음',
+    normal: '일시정지 최대 5회 / 1회당 최대 10초',
+    hard:   '일시정지 불가',
+};
+
+/* ─────────────────────────────────────
  * WASM 모듈 래퍼
  *   Emscripten 빌드 전에는 Mock으로 동작
  *   빌드 후 game_core.js 로드 시 자동으로 실제 WASM 사용
@@ -449,7 +466,26 @@ function showGameOver() {
 /* ─────────────────────────────────────
  * 버튼 이벤트
  * ───────────────────────────────────── */
+/* 난이도 버튼 */
+document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        difficulty = btn.dataset.diff;
+        document.getElementById('diff-desc').textContent = DIFF_DESC[difficulty];
+    });
+});
+
 document.getElementById('start-btn').addEventListener('click', () => {
+    pauseCount   = 0;
+    pauseSeconds = 0;
+    clearInterval(pauseTimer);
+
+    /* 어려움: 일시정지 버튼 비활성화 */
+    document.getElementById('pause-btn').disabled =
+        (difficulty === 'hard');
+    document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+
     C.init();
     showGame();
     startTimer();
@@ -465,6 +501,7 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     gameLoop();
 });
 
+/* 게임오버 화면 홈 버튼 */
 document.getElementById('home-btn').addEventListener('click', () => {
     clearInterval(timerInterval);
     cancelAnimationFrame(rafId);
@@ -473,17 +510,58 @@ document.getElementById('home-btn').addEventListener('click', () => {
     document.getElementById('start-screen').classList.remove('hidden');
 });
 
-document.getElementById('pause-btn').addEventListener('click', () => {
-    C.pause();
-    const isPaused = C.paused();
-    document.getElementById('pause-overlay').classList.toggle('hidden', !isPaused);
-    document.getElementById('pause-btn').textContent = isPaused ? '▶ 재개' : '⏸ 일시정지';
+/* HUD 홈 버튼 (게임 중 → 홈으로) */
+document.getElementById('hud-home-btn').addEventListener('click', () => {
+    clearInterval(timerInterval);
+    clearInterval(pauseTimer);
+    cancelAnimationFrame(rafId);
+    drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
+    changeMode = false;
+    document.getElementById('pause-overlay').classList.add('hidden');
+    document.getElementById('change-mode-banner').classList.add('hidden');
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
 });
 
-document.getElementById('resume-btn').addEventListener('click', () => {
+function resumeGame() {
+    clearInterval(pauseTimer);
     C.pause();
     document.getElementById('pause-overlay').classList.add('hidden');
     document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+}
+
+document.getElementById('pause-btn').addEventListener('click', () => {
+    if (difficulty === 'hard') return;  /* 어려움: 일시정지 불가 */
+
+    const isPaused = C.paused();
+
+    if (!isPaused) {
+        /* 일시정지 시도 */
+        if (difficulty === 'normal') {
+            if (pauseCount >= 5) return;  /* 5회 초과 불가 */
+            pauseCount++;
+            pauseSeconds = 0;
+            /* 10초 후 자동 재개 */
+            pauseTimer = setInterval(() => {
+                pauseSeconds++;
+                const remain = 10 - pauseSeconds;
+                document.getElementById('pause-btn').textContent = `▶ 재개 (${remain}s)`;
+                if (remain <= 0) resumeGame();
+            }, 1000);
+            document.getElementById('pause-btn').textContent =
+                `▶ 재개 (10s) [${pauseCount}/5]`;
+        } else {
+            document.getElementById('pause-btn').textContent = '▶ 재개';
+        }
+        C.pause();
+        document.getElementById('pause-overlay').classList.remove('hidden');
+    } else {
+        resumeGame();
+    }
+});
+
+document.getElementById('resume-btn').addEventListener('click', () => {
+    resumeGame();
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
