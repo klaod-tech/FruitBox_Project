@@ -10,6 +10,42 @@
  */
 
 /* ─────────────────────────────────────
+ * 로컬 저장소 (device_id + best_score)
+ *
+ * TODO: Supabase 연동 시 Store.syncToServer() 구현
+ *   - device_id + score를 leaderboard 테이블에 upsert
+ * ───────────────────────────────────── */
+const Store = {
+    getDeviceId() {
+        let id = localStorage.getItem('fruitbox_device_id');
+        if (!id) {
+            id = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+            localStorage.setItem('fruitbox_device_id', id);
+        }
+        return id;
+    },
+    getBest(diff) {
+        return parseInt(localStorage.getItem(`fruitbox_best_${diff}`) || '0', 10);
+    },
+    saveBest(diff, score) {
+        if (score >= this.getBest(diff)) {
+            localStorage.setItem(`fruitbox_best_${diff}`, score);
+            /* TODO: Store.syncToServer(this.getDeviceId(), diff, score); */
+        }
+    },
+    getTier(score) {
+        if (score >= 90) return { name: '챌린저', color: '#ff4444' };
+        if (score >= 76) return { name: '마스터',  color: '#e040fb' };
+        if (score >= 61) return { name: '다이아',  color: '#4fc3f7' };
+        if (score >= 46) return { name: '플레',    color: '#00e5ff' };
+        if (score >= 31) return { name: '골드',    color: '#ffd700' };
+        if (score >= 16) return { name: '실버',    color: '#c0c0c0' };
+        return                  { name: '브론즈',  color: '#cd7f32' };
+    },
+};
+
+/* ─────────────────────────────────────
  * 캔버스 & 셀 크기 설정
  * ───────────────────────────────────── */
 const ROWS = 10;
@@ -101,13 +137,14 @@ function buildMock() {
     const board = [];
     const itemType = [];
     let score = 0, timeLeft = 120, gameOver = false, paused = false;
-    let bestScore = 0;
+    let bestScore = Store.getBest(difficulty);
     let itemCounts = [2, 2];
     let hintActive = false, hintRow = -1, hintCol = -1, hintTimer = 0;
 
     function initBoard() {
         score = 0; timeLeft = 120; gameOver = false; paused = false;
         hintActive = false; itemCounts = [2, 2];
+        bestScore = Store.getBest(difficulty);
         for (let r = 0; r < ROWS; r++) {
             board[r] = [];
             itemType[r] = [];
@@ -191,7 +228,7 @@ function buildMock() {
             if (fn === 'tick') {
                 if (gameOver || paused) return;
                 if (timeLeft > 0) timeLeft--;
-                if (timeLeft === 0) { gameOver=true; if(score>bestScore) bestScore=score; }
+                if (timeLeft === 0) { gameOver=true; if(score>=bestScore) { bestScore=score; Store.saveBest(difficulty, score); } }
                 if (hintActive && hintTimer>0) { hintTimer--; if(hintTimer===0) hintActive=false; }
                 return;
             }
@@ -460,6 +497,13 @@ function showGameOver() {
     cancelAnimationFrame(rafId);
     document.getElementById('final-score').textContent = C.score();
     document.getElementById('final-best').textContent  = C.best();
+
+    const best = Store.getBest(difficulty);
+    const tier = Store.getTier(best);
+    const tierEl = document.getElementById('final-tier');
+    tierEl.textContent = tier.name;
+    tierEl.style.color = tier.color;
+
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
@@ -473,6 +517,7 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
         btn.classList.add('active');
         difficulty = btn.dataset.diff;
         document.getElementById('diff-desc').textContent = DIFF_DESC[difficulty];
+        updateStartTier();
     });
 });
 
@@ -497,6 +542,11 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     C.restart();
     drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
     changeMode = false;
+    pauseCount   = 0;
+    pauseSeconds = 0;
+    clearInterval(pauseTimer);
+    document.getElementById('pause-btn').disabled = (difficulty === 'hard');
+    document.getElementById('pause-btn').textContent = '⏸ 일시정지';
     startTimer();
     gameLoop();
 });
@@ -517,7 +567,7 @@ document.getElementById('hud-home-btn').addEventListener('click', () => {
     cancelAnimationFrame(rafId);
     drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
     changeMode = false;
-    document.getElementById('pause-overlay').classList.add('hidden');
+
     document.getElementById('change-mode-banner').classList.add('hidden');
     document.getElementById('game-screen').classList.add('hidden');
     document.getElementById('start-screen').classList.remove('hidden');
@@ -526,60 +576,40 @@ document.getElementById('hud-home-btn').addEventListener('click', () => {
 function resumeGame() {
     clearInterval(pauseTimer);
     C.pause();
-    document.getElementById('pause-overlay').classList.add('hidden');
     document.getElementById('pause-btn').textContent = '⏸ 일시정지';
 }
 
-function updatePauseOverlay(remain) {
-    const info = document.getElementById('pause-info');
-    if (difficulty === 'normal') {
-        info.classList.remove('hidden');
-        document.getElementById('pause-count-display').textContent =
-            `남은 횟수: ${5 - pauseCount}회`;
-        document.getElementById('pause-time-display').textContent =
-            remain !== null ? `남은 시간: ${remain}초` : '';
-    } else {
-        info.classList.add('hidden');
-    }
-}
-
 document.getElementById('pause-btn').addEventListener('click', () => {
-    if (difficulty === 'hard') return;  /* 어려움: 일시정지 불가 */
-
     const isPaused = C.paused();
 
     if (!isPaused) {
-        /* 일시정지 시도 */
-        if (difficulty === 'normal') {
-            if (pauseCount >= 5) return;  /* 5회 초과 불가 */
-            pauseCount++;
-            pauseSeconds = 0;
-            updatePauseOverlay(10);
-            /* 10초 후 자동 재개 */
-            pauseTimer = setInterval(() => {
-                pauseSeconds++;
-                const remain = 10 - pauseSeconds;
-                document.getElementById('pause-time-display').textContent =
-                    `남은 시간: ${remain}초`;
+        switch (difficulty) {
+            case 'hard':
+                return;
+
+            case 'normal':
+                if (pauseCount >= 5) return;
+                pauseCount++;
+                pauseSeconds = 0;
+                pauseTimer = setInterval(() => {
+                    pauseSeconds++;
+                    const remain = 10 - pauseSeconds;
+                    document.getElementById('pause-btn').textContent =
+                        `▶ 재개 (${remain}s) [${pauseCount}/5]`;
+                    if (remain <= 0) resumeGame();
+                }, 1000);
                 document.getElementById('pause-btn').textContent =
-                    `▶ 재개 (${remain}s) [${pauseCount}/5]`;
-                if (remain <= 0) resumeGame();
-            }, 1000);
-            document.getElementById('pause-btn').textContent =
-                `▶ 재개 (10s) [${pauseCount}/5]`;
-        } else {
-            updatePauseOverlay(null);
-            document.getElementById('pause-btn').textContent = '▶ 재개';
+                    `▶ 재개 (10s) [${pauseCount}/5]`;
+                break;
+
+            case 'easy':
+                document.getElementById('pause-btn').textContent = '▶ 재개';
+                break;
         }
         C.pause();
-        document.getElementById('pause-overlay').classList.remove('hidden');
     } else {
         resumeGame();
     }
-});
-
-document.getElementById('resume-btn').addEventListener('click', () => {
-    resumeGame();
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
@@ -602,8 +632,60 @@ document.getElementById('change-btn').addEventListener('click', () => {
 });
 
 /* ─────────────────────────────────────
+ * 키보드 단축키
+ *   Q : 게임 종료 → 첫 화면으로 복귀
+ *   R : 게임 재시작 → 동일 난이도로 보드 재설정
+ * ───────────────────────────────────── */
+document.addEventListener('keydown', (e) => {
+    /* 게임 화면이 아닐 때는 단축키 무시 */
+    if (document.getElementById('game-screen').classList.contains('hidden')) return;
+
+    switch (e.key.toUpperCase()) {
+        case 'Q':
+            clearInterval(timerInterval);
+            clearInterval(pauseTimer);
+            cancelAnimationFrame(rafId);
+            drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
+            changeMode = false;
+        
+            document.getElementById('change-mode-banner').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            break;
+
+        case 'R':
+            C.restart();
+            drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
+            changeMode = false;
+            pauseCount   = 0;
+            pauseSeconds = 0;
+            clearInterval(pauseTimer);
+            clearInterval(timerInterval);
+            cancelAnimationFrame(rafId);
+        
+            document.getElementById('change-mode-banner').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('pause-btn').disabled = (difficulty === 'hard');
+            document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+            startTimer();
+            gameLoop();
+            break;
+    }
+});
+
+/* ─────────────────────────────────────
  * 초기화: WASM 로드
  * ───────────────────────────────────── */
+function updateStartTier() {
+    const best = Store.getBest(difficulty);
+    const tier = Store.getTier(best);
+    const el   = document.getElementById('start-tier');
+    el.textContent = `${tier.name}  (최고: ${best}점)`;
+    el.style.color = tier.color;
+}
+
 loadWasm().then((isWasm) => {
     console.log(isWasm ? 'WASM 모드로 실행' : 'Mock 모드로 실행 (WASM 없음)');
+    updateStartTier();
 });

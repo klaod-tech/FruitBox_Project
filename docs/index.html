@@ -29,6 +29,7 @@
             </div>
             <div id="diff-desc" class="diff-desc">일시정지 제한 없음</div>
 
+            <div id="start-tier" class="tier-display"></div>
             <button id="start-btn">게임 시작</button>
         </div>
     </div>
@@ -59,19 +60,7 @@
         <!-- 선택 합계 표시 (보드 아래) -->
         <div id="sum-display" class="hidden">합계: <span id="sum-value">0</span> / 10</div>
 
-        <!-- 일시정지 오버레이 -->
-        <div id="pause-overlay" class="hidden">
-            <div class="overlay-box">
-                <h2>⏸ 일시정지</h2>
-                <div id="pause-info" class="pause-info hidden">
-                    <span id="pause-count-display"></span>
-                    <span id="pause-time-display"></span>
-                </div>
-                <button id="resume-btn">재개</button>
-            </div>
-        </div>
-
-        <!-- 숫자 변환 모드 안내 -->
+<!-- 숫자 변환 모드 안내 -->
         <div id="change-mode-banner" class="hidden">
             🔢 변환할 사과를 클릭하세요
         </div>
@@ -83,6 +72,7 @@
             <h2>GAME OVER</h2>
             <p>SCORE: <span id="final-score">0</span></p>
             <p>BEST: <span id="final-best">0</span></p>
+            <p>티어: <span id="final-tier"></span></p>
             <button id="restart-btn">다시 시작</button>
             <button id="home-btn">처음으로</button>
         </div>

@@ -335,3 +335,17 @@ button:active { transform: scale(0.96); }
 }
 #restart-btn { background: #e94560; color: white; }
 #home-btn    { background: #0f3460; color: #4fc3f7; }
+
+.tier-display {
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    min-height: 1.4em;
+}
+
+#final-tier {
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
