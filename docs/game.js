@@ -633,14 +633,32 @@ document.getElementById('change-btn').addEventListener('click', () => {
 
 /* ─────────────────────────────────────
  * 키보드 단축키
- *   Q : 게임 종료 → 첫 화면으로 복귀
- *   R : 게임 재시작 → 동일 난이도로 보드 재설정
+ *   P : 일시정지 / 재개
+ *   Q : 첫 화면으로 복귀
+ *   W : 숫자 변환 아이템 사용
+ *   E : 돋보기 아이템 사용
+ *   R : 보드 재시작
  * ───────────────────────────────────── */
 document.addEventListener('keydown', (e) => {
     /* 게임 화면이 아닐 때는 단축키 무시 */
     if (document.getElementById('game-screen').classList.contains('hidden')) return;
 
     switch (e.key.toUpperCase()) {
+        case 'P':
+            document.getElementById('pause-btn').click();
+            break;
+
+        case 'E':
+            if (!C.over() && !C.paused()) C.useHint();
+            break;
+
+        case 'W':
+            if (!C.over() && !C.paused() && C.itemCount(1) > 0) {
+                changeMode = !changeMode;
+                document.getElementById('change-mode-banner').classList.toggle('hidden', !changeMode);
+            }
+            break;
+
         case 'Q':
             clearInterval(timerInterval);
             clearInterval(pauseTimer);
