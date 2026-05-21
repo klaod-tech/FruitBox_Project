@@ -119,7 +119,7 @@ static void input_loop(void)
 
         if (ch == KEY_MOUSE && getmouse(&ev) == OK) {
             handle_mouse(&ev);   /* ui.c */
-        } else if (ch == 'q' || ch == 'Q') {
+        } else if (ch == 'q') {
             pthread_mutex_lock(&board_mutex);
             flags.game_over = true;
             pthread_mutex_unlock(&board_mutex);
@@ -127,6 +127,24 @@ static void input_loop(void)
         } else if (ch == 'p' || ch == 'P') {
             pthread_mutex_lock(&board_mutex);
             flags.paused = !flags.paused;
+            pthread_mutex_unlock(&board_mutex);
+        } else if (ch == 'e' || ch == 'E') {
+            pthread_mutex_lock(&board_mutex);
+            if (item_counts[ITEM_HINT] > 0) {
+                int hr, hc;
+                if (find_hint(&hr, &hc)) {
+                    item_counts[ITEM_HINT]--;
+                    flags.hint_active = true;
+                    flags.hint_row    = hr;
+                    flags.hint_col    = hc;
+                    flags.hint_timer  = 3;
+                }
+            }
+            pthread_mutex_unlock(&board_mutex);
+        } else if (ch == 'w' || ch == 'W') {
+            pthread_mutex_lock(&board_mutex);
+            if (item_counts[ITEM_CHANGE] > 0 && !flags.change_mode)
+                flags.change_mode = true;
             pthread_mutex_unlock(&board_mutex);
         }
 

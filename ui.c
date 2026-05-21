@@ -179,7 +179,7 @@ void draw_hud(void)
     /* 돋보기 아이콘 */
     if (flags.change_mode == false)
         attron(COLOR_PAIR(ic_hint > 0 ? COL_ITEM_DOUBLE : COL_REMOVED));
-    mvprintw(hud, ICON_HINT_COL, "[Q:%d]", ic_hint);
+    mvprintw(hud, ICON_HINT_COL, "[E:%d]", ic_hint);
     attroff(COLOR_PAIR(COL_ITEM_DOUBLE));
     attroff(COLOR_PAIR(COL_REMOVED));
 
@@ -208,7 +208,7 @@ void draw_hud(void)
 
     /* 조작 안내 */
     mvprintw(RESET_ROW + 1, 2,
-        "[q]종료 [p]일시정지 [Q]돋보기 [W]숫자변환 | 드래그=합10선택");
+        "[q]종료 [p]일시정지 [e]돋보기 [w]숫자변환 | 드래그=합10선택");
 
     /* 리셋 버튼 (REQ-007) */
     attron(COLOR_PAIR(COL_UI_BG));
