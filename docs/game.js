@@ -310,8 +310,15 @@ function drawCell(r, c) {
     if (removed) {
         ctx.fillStyle = COLOR.removed;
         ctx.fillRect(x, y, CELL, CELL);
-        ctx.strokeStyle = COLOR.cellBorder;
-        ctx.lineWidth = 0.5;
+        if (isSelected) {
+            ctx.fillStyle = COLOR.select;
+            ctx.fillRect(x, y, CELL, CELL);
+            ctx.strokeStyle = COLOR.selectBorder;
+            ctx.lineWidth = 2;
+        } else {
+            ctx.strokeStyle = COLOR.cellBorder;
+            ctx.lineWidth = 0.5;
+        }
         ctx.strokeRect(x+0.5, y+0.5, CELL-1, CELL-1);
         return;
     }

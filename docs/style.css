@@ -156,6 +156,8 @@ body {
     flex-wrap: wrap;
 }
 
+.hud-right button { min-width: 90px; }
+
 .hud-center { font-size: 1.2rem; font-weight: bold; }
 
 #score-display { font-size: 1rem; color: #f5a623; font-weight: bold; }
@@ -200,9 +202,9 @@ button:active { transform: scale(0.96); }
 }
 .item-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-#pause-btn    { background: #2d6a4f; color: #d8f3dc; }
-#reset-btn    { background: #5c3317; color: #ffd6a5; }
-#hud-home-btn { background: #3a3a5c; color: #aaa; font-size: 1rem; padding: 6px 10px; }
+#pause-btn    { background: #2d6a4f; color: #d8f3dc; border: 1px solid #52b788; }
+#reset-btn    { background: #5c3317; color: #ffd6a5; border: 1px solid #9c6644; }
+#hud-home-btn { background: #3a3a5c; color: #aaa;    border: 1px solid #5a5a8c; min-width: 44px; }
 
 /* ─────────────────────────────────────
  * 선택 합계 표시
