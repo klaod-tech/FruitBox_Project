@@ -72,7 +72,6 @@ const COLOR = {
     hintBorder:'#69f0ae',
     bomb:      '#e94560',
     clock:     '#4fc3f7',
-    double:    '#69f0ae',
     numColors: ['#fff','#ff6b6b','#ffd166','#06d6a0',
                 '#118ab2','#e040fb','#ff9800','#e91e63','#b2ff59'],
 };
@@ -342,8 +341,8 @@ function drawCell(r, c) {
     ctx.textBaseline = 'middle';
 
     if (isItem) {
-        const labels = {1:'💣', 2:'⏱️', 3:'✖️'};
-        const colors = {1:COLOR.bomb, 2:COLOR.clock, 3:COLOR.double};
+        const labels = {1:'💣', 2:'⏱️'};
+        const colors = {1:COLOR.bomb, 2:COLOR.clock};
         ctx.fillStyle = colors[iType] || '#fff';
         ctx.font = `bold ${CELL*0.38}px Segoe UI`;
         ctx.fillText(labels[iType] || '?', x + CELL/2, y + CELL/2);

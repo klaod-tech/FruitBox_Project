@@ -68,7 +68,7 @@ void ui_init(void)
     init_pair(COL_REMOVED,     COLOR_BLACK,  -1);
     init_pair(COL_ITEM_BOMB,   COLOR_RED,    -1);
     init_pair(COL_ITEM_CLOCK,  COLOR_CYAN,   -1);
-    init_pair(COL_ITEM_DOUBLE, COLOR_GREEN,  -1);
+    init_pair(COL_GREEN, COLOR_GREEN,  -1);
     init_pair(COL_TIMER_WARN,  COLOR_RED,    -1);
     init_pair(COL_HINT,        COLOR_BLACK,  COLOR_GREEN);
     init_pair(COL_UI_BG,       COLOR_WHITE,  COLOR_BLUE);
@@ -137,10 +137,9 @@ void draw_board(void)
 
             if (a->is_item) {
                 switch (item_types[r][c]) {
-                    case ITYPE_BOMB:   addstr("[B] "); break;
-                    case ITYPE_CLOCK:  addstr("[C] "); break;
-                    case ITYPE_DOUBLE: addstr("[x2]"); break;
-                    default:           addstr("[?] "); break;
+                    case ITYPE_BOMB:  addstr("[B] "); break;
+                    case ITYPE_CLOCK: addstr("[C] "); break;
+                    default:          addstr("[?] "); break;
                 }
             } else {
                 printw(" %d  ", a->value);
@@ -178,9 +177,9 @@ void draw_hud(void)
 
     /* 돋보기 아이콘 */
     if (flags.change_mode == false)
-        attron(COLOR_PAIR(ic_hint > 0 ? COL_ITEM_DOUBLE : COL_REMOVED));
+        attron(COLOR_PAIR(ic_hint > 0 ? COL_GREEN : COL_REMOVED));
     mvprintw(hud, ICON_HINT_COL, "[E:%d]", ic_hint);
-    attroff(COLOR_PAIR(COL_ITEM_DOUBLE));
+    attroff(COLOR_PAIR(COL_GREEN));
     attroff(COLOR_PAIR(COL_REMOVED));
 
     /* 숫자 변환 아이콘 */
@@ -196,7 +195,7 @@ void draw_hud(void)
                            drag.endY,   drag.endX);
         pthread_mutex_unlock(&board_mutex);
 
-        int pair = (s == TARGET_SUM) ? COL_ITEM_DOUBLE : COL_TIMER_WARN;
+        int pair = (s == TARGET_SUM) ? COL_GREEN : COL_TIMER_WARN;
         attron(COLOR_PAIR(pair) | A_BOLD);
         mvprintw(hud, 22, "합계: %2d/%2d  %s",
                  s, TARGET_SUM,

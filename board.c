@@ -72,8 +72,7 @@ int sum_region(int startY, int startX, int endY, int endX)
  * REQ-004 FNC-004: 사과 제거 및 점수 반영
  *   합이 TARGET_SUM(10) 인 경우에만 제거
  *   점수 = 제거된 사과 개수 × SCORE_PER_APPLE (시간 보상 없음)
- *   ITYPE_DOUBLE 포함 시 점수 2배
- *   ITYPE_BOMB   포함 시 인접 4칸 추가 파괴
+ *   ITYPE_BOMB 포함 시 인접 4칸 추가 파괴
  *   board_mutex 잠근 상태에서 호출
  *   반환값: 획득 점수 (0이면 제거 안 됨)
  * ───────────────────────────────────── */
@@ -91,13 +90,11 @@ int remove_region(int startY, int startX, int endY, int endX)
     if (cmin < 0) cmin = 0;  if (cmax >= BOARD_COLS) cmax = BOARD_COLS - 1;
 
     /* 1차 패스: 특수 효과 확인 */
-    bool has_double = false;
-    int  bomb_r = -1, bomb_c = -1;
+    int bomb_r = -1, bomb_c = -1;
 
     for (int r = rmin; r <= rmax; r++)
         for (int c = cmin; c <= cmax; c++) {
             if (board[r][c].removed) continue;
-            if (item_types[r][c] == ITYPE_DOUBLE) has_double = true;
             if (item_types[r][c] == ITYPE_BOMB) { bomb_r = r; bomb_c = c; }
         }
 
@@ -116,7 +113,6 @@ int remove_region(int startY, int startX, int endY, int endX)
 
     /* 점수 계산 (시간 보상 없음 – 문서 명시) */
     int gained = count * SCORE_PER_APPLE;
-    if (has_double) gained *= 2;
 
     score += gained;
 
@@ -167,22 +163,13 @@ void spawn_item(void)
     int r = empties[idx][0];
     int c = empties[idx][1];
 
-    /* 타입 가중 랜덤: BOMB 25% / CLOCK 25% / DOUBLE 50% */
-    ItemType types[]   = {ITYPE_BOMB, ITYPE_CLOCK, ITYPE_DOUBLE};
-    int      weights[] = {25, 25, 50};
-    int roll = rand() % 100, cum = 0;
-    ItemType chosen = ITYPE_DOUBLE;
-    for (int i = 0; i < 3; i++) {
-        cum += weights[i];
-        if (roll < cum) { chosen = types[i]; break; }
-    }
+    /* 타입 랜덤: BOMB 50% / CLOCK 50% */
+    ItemType chosen = (rand() % 2 == 0) ? ITYPE_BOMB : ITYPE_CLOCK;
 
     board[r][c].removed    = false;
     board[r][c].value      = 0;
     board[r][c].is_item    = true;
-    board[r][c].color_pair = (chosen == ITYPE_BOMB)   ? COL_ITEM_BOMB   :
-                             (chosen == ITYPE_CLOCK)   ? COL_ITEM_CLOCK  :
-                                                         COL_ITEM_DOUBLE;
+    board[r][c].color_pair = (chosen == ITYPE_BOMB) ? COL_ITEM_BOMB : COL_ITEM_CLOCK;
     item_types[r][c] = chosen;
 }
 

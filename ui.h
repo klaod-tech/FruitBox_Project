@@ -15,7 +15,7 @@
 #define COL_REMOVED  3   /* 제거된 칸  */
 #define COL_ITEM_BOMB   4
 #define COL_ITEM_CLOCK  5
-#define COL_ITEM_DOUBLE 6
+#define COL_GREEN       6
 #define COL_TIMER_WARN  7   /* 타이머 15초 이하 경고 */
 #define COL_HINT        8   /* 돋보기 강조 */
 #define COL_UI_BG       9   /* UI 패널 배경 */

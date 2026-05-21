@@ -52,10 +52,9 @@ typedef struct {
  *   is_item == true 인 Apple 에 부여
  * ───────────────────────────────────── */
 typedef enum {
-    ITYPE_NONE   = 0,
-    ITYPE_BOMB   = 1,   /* 폭탄: 인접 4칸 제거          */
-    ITYPE_CLOCK  = 2,   /* 시계: 타이머 +5초            */
-    ITYPE_DOUBLE = 3    /* 더블: 해당 턴 점수 2배       */
+    ITYPE_NONE  = 0,
+    ITYPE_BOMB  = 1,   /* 폭탄: 인접 4칸 제거 */
+    ITYPE_CLOCK = 2,   /* 시계: 타이머 +5초   */
 } ItemType;
 
 /* ─────────────────────────────────────
