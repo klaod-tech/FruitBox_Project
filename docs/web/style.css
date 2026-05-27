@@ -123,6 +123,14 @@ body {
     flex-wrap: wrap;
 }
 
+.hud-right button {
+    min-width: 110px;
+    padding: 8px 12px;
+    height: 40px;
+    line-height: 1.2;
+    text-align: center;
+}
+
 .hud-center { font-size: 1.2rem; font-weight: bold; }
 
 #score-display { font-size: 1rem; color: #f5a623; font-weight: bold; }
@@ -182,6 +190,7 @@ button:active { transform: scale(0.96); }
     color: #ccc;
 }
 #sum-display.match { color: #69f0ae; font-weight: bold; }
+#sum-display.invalid { color: #e94560; font-weight: bold; }
 
 /* ─────────────────────────────────────
  * 캔버스
@@ -200,7 +209,7 @@ button:active { transform: scale(0.96); }
  * ───────────────────────────────────── */
 #change-mode-banner {
     position: fixed;
-    top: 70px;
+    bottom: 300px;
     left: 50%;
     transform: translateX(-50%);
     background: #f5a623;
