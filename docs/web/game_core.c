@@ -177,7 +177,7 @@ EMSCRIPTEN_KEEPALIVE
 int remove_region(int r1, int c1, int r2, int c2)
 {
     int s = sum_region(r1, c1, r2, c2);
-    if (s <= 0 || s % TARGET_SUM != 0) return 0;
+    if (s != TARGET_SUM) return 0;
 
     int rmin = clamp_r(r1 < r2 ? r1 : r2);
     int rmax = clamp_r(r1 > r2 ? r1 : r2);
