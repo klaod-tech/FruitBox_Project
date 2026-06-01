@@ -35,13 +35,15 @@ const Store = {
         }
     },
     getTier(score) {
-        if (score >= 90) return { name: '챌린저', color: '#ff4444' };
-        if (score >= 76) return { name: '마스터',  color: '#e040fb' };
-        if (score >= 61) return { name: '다이아',  color: '#4fc3f7' };
-        if (score >= 46) return { name: '플레',    color: '#00e5ff' };
-        if (score >= 31) return { name: '골드',    color: '#ffd700' };
-        if (score >= 16) return { name: '실버',    color: '#c0c0c0' };
-        return                  { name: '브론즈',  color: '#cd7f32' };
+        switch (true) {
+            case score >= 90: return { name: '챌린저', color: '#ff4444' };
+            case score >= 76: return { name: '마스터',  color: '#e040fb' };
+            case score >= 61: return { name: '다이아',  color: '#4fc3f7' };
+            case score >= 46: return { name: '플레',    color: '#00e5ff' };
+            case score >= 31: return { name: '골드',    color: '#ffd700' };
+            case score >= 16: return { name: '실버',    color: '#c0c0c0' };
+            default:          return { name: '브론즈',  color: '#cd7f32' };
+        }
     },
 };
 
