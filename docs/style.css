@@ -217,7 +217,8 @@ button:active { transform: scale(0.96); }
     border-radius: 20px;
     color: #ccc;
 }
-#sum-display.match { color: #69f0ae; font-weight: bold; }
+#sum-display.match   { color: #69f0ae; font-weight: bold; }
+#sum-display.invalid { color: #e94560; font-weight: bold; }
 
 /* ─────────────────────────────────────
  * 캔버스
@@ -236,7 +237,7 @@ button:active { transform: scale(0.96); }
  * ───────────────────────────────────── */
 #change-mode-banner {
     position: fixed;
-    top: 70px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     background: #f5a623;

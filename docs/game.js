@@ -391,9 +391,11 @@ function updateHud() {
     if (drag.active) {
         const s = C.sumRegion(drag.r1, drag.c1, drag.r2, drag.c2);
         sumEl.classList.remove('hidden');
-        sumEl.classList.toggle('match', s === 10);
+        sumEl.classList.toggle('match',   s === 10);
+        sumEl.classList.toggle('invalid', s > 0 && s !== 10);
         document.getElementById('sum-value').textContent = s;
     } else {
+        sumEl.classList.remove('invalid');
         sumEl.classList.add('hidden');
     }
 }
