@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FruitBox</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 스타트 화면 -->
+    <div id="start-screen">
+        <div class="start-box">
+            <h1>🍎 FruitBox</h1>
+            <p class="subtitle">합이 <span class="highlight">10</span>이 되도록 사과를 드래그해서 제거하세요!</p>
+            <div class="rules">
+                <div class="rule-item">🖱️ 마우스 드래그로 영역 선택</div>
+                <div class="rule-item">🎯 선택 영역의 합 = 10 이면 제거</div>
+                <div class="rule-item">💣 폭탄: 클릭 시 인접 4칸 제거</div>
+                <div class="rule-item">⏱️ 시계: 클릭 시 시간 +5초</div>
+            </div>
+
+            <!-- 난이도 선택 -->
+            <div class="difficulty-label">난이도 선택</div>
+            <div class="difficulty-btns">
+                <button class="diff-btn active" data-diff="easy">🟢 쉬움</button>
+                <button class="diff-btn" data-diff="normal">🟡 보통</button>
+                <button class="diff-btn" data-diff="hard">🔴 어려움</button>
+            </div>
+            <div id="diff-desc" class="diff-desc">일시정지 제한 없음</div>
+
+            <div id="start-tier" class="tier-display"></div>
+            <button id="start-btn">게임 시작</button>
+        </div>
+    </div>
+
+    <!-- 게임 화면 -->
+    <div id="game-screen" class="hidden">
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-left">
+                <span id="score-display">SCORE: 0</span>
+                <span id="best-display">BEST: 0</span>
+            </div>
+            <div class="hud-center">
+                <span id="timer-display">TIME: 120</span>
+            </div>
+            <div class="hud-right">
+                <button id="hint-btn" class="item-btn">🔍 힌트 <span id="hint-count">x2</span></button>
+                <button id="change-btn" class="item-btn">🔢 변환 <span id="change-count">x2</span></button>
+                <button id="pause-btn">⏸ 일시정지</button>
+                <button id="reset-btn">🔄 리셋</button>
+                <button id="hud-home-btn">🏠</button>
+            </div>
+        </div>
+
+        <!-- 게임 캔버스 -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 선택 합계 표시 (보드 아래) -->
+        <div id="sum-display" class="hidden">합계: <span id="sum-value">0</span> / 10</div>
+
+<!-- 숫자 변환 모드 안내 -->
+        <div id="change-mode-banner" class="hidden">
+            🔢 변환할 사과를 클릭하세요
+        </div>
+    </div>
+
+    <!-- 게임 오버 화면 -->
+    <div id="gameover-screen" class="hidden">
+        <div class="gameover-box">
+            <h2>GAME OVER</h2>
+            <p>SCORE: <span id="final-score">0</span></p>
+            <p>BEST: <span id="final-best">0</span></p>
+            <p>티어: <span id="final-tier"></span></p>
+            <button id="restart-btn">다시 시작</button>
+            <button id="home-btn">처음으로</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+/* ─────────────────────────────────────
+ * 기본 리셋 & 전체 레이아웃
+ * ───────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    background: #1a1a2e;
+}
+
+body {
+    background: #1a1a2e;
+    color: #eeeeee;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ─────────────────────────────────────
+ * 스타트 화면
+ * ───────────────────────────────────── */
+#start-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+.start-box {
+    background: #16213e;
+    border: 2px solid #e94560;
+    border-radius: 16px;
+    padding: 40px 50px;
+    text-align: center;
+    max-width: 440px;
+    width: 90%;
+    box-shadow: 0 0 40px rgba(233,69,96,0.3);
+}
+
+.start-box h1 {
+    font-size: 2.8rem;
+    color: #e94560;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 24px;
+}
+
+.highlight { color: #f5a623; font-weight: bold; }
+
+.rules {
+    background: #0f3460;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    text-align: left;
+}
+
+.rule-item {
+    padding: 5px 0;
+    font-size: 0.9rem;
+    color: #ccc;
+    border-bottom: 1px solid #1a4a80;
+}
+.rule-item:last-child { border-bottom: none; }
+
+#start-btn {
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.1s;
+}
+#start-btn:hover  { background: #c73652; transform: scale(1.04); }
+#start-btn:active { transform: scale(0.97); }
+
+/* ─────────────────────────────────────
+ * 게임 화면 전체 레이아웃
+ * ───────────────────────────────────── */
+#game-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* ─────────────────────────────────────
+ * HUD (상단 바)
+ * ───────────────────────────────────── */
+#hud {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #16213e;
+    border-bottom: 2px solid #0f3460;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.hud-left, .hud-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hud-right button {
+    min-width: 110px;
+    padding: 8px 12px;
+    height: 40px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.hud-center { font-size: 1.2rem; font-weight: bold; }
+
+#score-display { font-size: 1rem; color: #f5a623; font-weight: bold; }
+#best-display  { font-size: 0.85rem; color: #888; }
+
+#timer-display {
+    color: #4fc3f7;
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-width: 90px;
+    text-align: center;
+}
+#timer-display.warn { color: #e94560; animation: blink 0.8s infinite; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+
+/* 버튼 공통 */
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.15s, transform 0.1s;
+}
+button:hover  { opacity: 0.85; }
+button:active { transform: scale(0.96); }
+
+.item-btn {
+    background: #0f3460;
+    color: #4fc3f7;
+    border: 1px solid #1a5080;
+}
+.item-btn.active {
+    background: #f5a623;
+    color: #1a1a2e;
+    border-color: #f5a623;
+}
+.item-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+#pause-btn  { background: #2d6a4f; color: #d8f3dc; }
+#reset-btn  { background: #5c3317; color: #ffd6a5; }
+
+/* ─────────────────────────────────────
+ * 선택 합계 표시
+ * ───────────────────────────────────── */
+#sum-display {
+    margin: 6px 0 2px;
+    font-size: 1rem;
+    background: #0f3460;
+    padding: 4px 18px;
+    border-radius: 20px;
+    color: #ccc;
+}
+#sum-display.match { color: #69f0ae; font-weight: bold; }
+#sum-display.invalid { color: #e94560; font-weight: bold; }
+
+/* ─────────────────────────────────────
+ * 캔버스
+ * ───────────────────────────────────── */
+#game-canvas {
+    display: block;
+    cursor: crosshair;
+    border: 2px solid #0f3460;
+    border-radius: 8px;
+    background: #0d1b2a;
+    margin-top: 6px;
+}
+
+/* ─────────────────────────────────────
+ * 숫자 변환 모드 배너
+ * ───────────────────────────────────── */
+#change-mode-banner {
+    position: fixed;
+    bottom: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f5a623;
+    color: #1a1a2e;
+    font-weight: bold;
+    font-size: 0.95rem;
+    padding: 8px 24px;
+    border-radius: 20px;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(245,166,35,0.5);
+}
+
+/* ─────────────────────────────────────
+ * 일시정지 오버레이
+ * ───────────────────────────────────── */
+#pause-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.overlay-box {
+    background: #16213e;
+    border: 2px solid #4fc3f7;
+    border-radius: 14px;
+    padding: 36px 50px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(79,195,247,0.3);
+}
+.overlay-box h2 { font-size: 1.8rem; margin-bottom: 20px; color: #4fc3f7; }
+
+#resume-btn {
+    background: #4fc3f7;
+    color: #1a1a2e;
+    padding: 10px 36px;
+    font-size: 1rem;
+}
+
+/* ─────────────────────────────────────
+ * 게임 오버 화면
+ * ───────────────────────────────────── */
+#gameover-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+}
+
+.gameover-box {
+    background: #16213e;
+    border: 2px solid #e94560;
+    border-radius: 16px;
+    padding: 40px 56px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(233,69,96,0.4);
+}
+.gameover-box h2 {
+    font-size: 2.2rem;
+    color: #e94560;
+    margin-bottom: 16px;
+    letter-spacing: 3px;
+}
+.gameover-box p {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: #eee;
+}
+.gameover-box p span { color: #f5a623; font-weight: bold; }
+
+.gameover-box button {
+    margin: 12px 8px 0;
+    padding: 11px 32px;
+    font-size: 1rem;
+}
+#restart-btn { background: #e94560; color: white; }
+#home-btn    { background: #0f3460; color: #4fc3f7; }
