@@ -200,11 +200,15 @@ function buildMock() {
                 const type = itemType[r][c];
                 board[r][c].removed = true;
                 if (type === 1) {  /* 폭탄 */
+                    let bonus = 0;
                     [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{
                         const nr=r+dr, nc=c+dc;
-                        if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS) board[nr][nc].removed=true;
+                        if (nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&!board[nr][nc].removed) {
+                            board[nr][nc].removed=true;
+                            bonus++;
+                        }
                     });
-                    score += 5;
+                    score += bonus;
                 } else if (type === 2) {  /* 시계 */
                     timeLeft += 5;
                 }
