@@ -303,41 +303,64 @@ score >= getBest(diff) ?
 pause 버튼 클릭 시 독립적으로 실행되는 이벤트 리스너입니다.
 
 ```
-pause-btn 클릭
+일시정지 버튼 클릭
+pause-btn.addEventListener('click', ...)
   │
   ▼
-┌──────────────────────────────────────────┐
-│ 현재 일시정지 상태 확인                    │
-│ isPaused = C.paused()                    │
-└──────────────────────────────────────────┘
+현재 정지 상태 확인
+isPaused = C.paused()
   │
-  ▼
-isPaused ?
+  ├─ True ──► 정지 상태 해제
+  │           clearInterval(pauseTimer)
+  │           C.pause()
+  │               │
+  │               ▼
+  │           정지 버튼 추가
+  │           pause-btn.textContent = '일시정지'
   │
-  ├─ True (현재 정지 중)
-  │   clearInterval(pauseTimer)
-  │   C.pause()
-  │   pause-btn.textContent = '⏸ 일시정지'
-  │
-  └─ False (게임 진행 중)
+  └─ False
        │
        ▼
-  switch (difficulty)
+  난이도 확인
+  switch(difficulty)
        │
-       ├─ 'hard'
-       │   → return  (버튼 disabled, 실행 안 됨)
+       ├─ easy
+       │   쉬움 단계 무한 정지 가능
+       │   C.pause()
+       │       │
+       │       ▼
+       │   재개 버튼 추가
+       │   pause-btn.textContent = '재개'
        │
-       ├─ 'normal'
-       │   pauseCount >= 5 ?
-       │   ├─ True  → return  (횟수 초과)
-       │   └─ False
-       │        pauseCount++
-       │        setInterval 카운트다운 시작
-       │        remain = 10 - pauseSeconds
-       │        pause-btn.textContent = `▶ 재개 (${remain}s) [${pauseCount}/5]`
-       │        if (remain <= 0) resumeGame()
+       ├─ hard
+       │   어려움 단계 정지 불가
+       │   return
        │
-       └─ 'easy'
-           C.pause()
-           pause-btn.textContent = '▶ 재개'
+       └─ normal
+           중간 단계 5회 정지 가능 횟수 확인
+           if(pauseCount >= 5) return
+               │ false
+               ▼
+           정지 회수 및 카운트 추가
+           pauseCount++
+           pauseSeconds++
+           const remain = 10 - pauseSeconds  ◄──────┐
+               │                                    │
+               ▼                                    │
+           재개 화면 추가                             │
+           pause-btn.textContent =                  │
+             `재개 (${remain}s [${pauseCount}/5]`   │
+               │                                    │
+               ▼                                    │
+           카운트 종료 또는 버튼 클릭                  │
+           if(remain <= 0)                          │
+           pause-btn.onClick                        │
+               │                                    │
+               ├─ False ────────────────────────────┘
+               │
+               └─ True
+                     │
+                     ▼
+                 게임 재개
+                 resumeGame()
 ```
