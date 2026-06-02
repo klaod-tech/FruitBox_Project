@@ -9,40 +9,58 @@
 
 ```
 앱 실행
+document.getElementById('start-screen')
   │
   ▼
-┌─────────────────────────────────────────────────────┐
-│ [알고리즘 18] 기기 ID 생성                            │
-│ localStorage에 ID 없으면 UUID 신규 생성 후 저장       │
-│                                                     │
-│ let id = localStorage.getItem('fruitbox_device_id') │
-│ if (!id) { id = generateUUID(); setItem(..., id); } │
-└─────────────────────────────────────────────────────┘
+기기 ID 생성
+let id = localStorage.getItem('fruitbox_device_id')
+if (!id) { id = generateUUID(); setItem(..., id); }
   │
   ▼
-┌──────────────────────────────────────────────────────────┐
-│ [알고리즘 17] localStorage 기록 불러오기                   │
-│ 난이도별 키로 최고 기록 조회, 없으면 0 반환               │
-│                                                          │
-│ parseInt(localStorage.getItem(`fruitbox_best_${diff}`)   │
-│          || '0', 10)                                     │
-└──────────────────────────────────────────────────────────┘
+기록 불러오기
+parseInt(localStorage.getItem(`fruitbox_best_${diff}`) || '0', 10)
   │
   ▼
-┌──────────────────────────────────────────────────────────────┐
-│ [알고리즘 19] 티어 판정                                        │
-│ 점수 구간을 높은 쪽부터 비교, 첫 번째 만족 구간 반환          │
-│                                                              │
-│ if (score >= 90) return { name: '챌린저', color: '#ff4444' } │
-│ ...                                                          │
-│ return { name: '브론즈', color: '#cd7f32' }                  │
-└──────────────────────────────────────────────────────────────┘
+점수로 티어 판정
+switch(true)
+case score >= n : return {name: 'tier', color: 'color'}
+  │
+  ├─ score < 16  → 브론즈
+  │                default: return {name: '브론즈', color: '#cd7f32'}
+  │
+  ├─ score >= 31 → 골드
+  │                return {name: '골드', color: '#ffd700'}
+  │
+  └─ score >= 90 → 챌린저
+                   return {name: '챌린저', color: '#ff4444'}
+  │ (전체 case 수렴)
+  ▼
+난이도 선택
+difficulty = btn.dataset.diff ('easy'|'normal'|'hard')
   │
   ▼
-난이도 선택 → 버튼 클릭 시 difficulty 변경 + 티어 즉시 갱신
+switch(difficulty)
+case 'easy' | case 'normal' | case 'hard'
   │
+  ├─ 쉬움
+  │   일시 정지 무제한
+  │   difficulty === 'easy'?
+  │   updatePauseOverlay(null)
+  │
+  ├─ 보통
+  │   일시 정지 5회 회당 10초
+  │   difficulty === 'normal'?
+  │   if(pauseCount >= 5) return
+  │   updatePauseOverlay(10)
+  │
+  └─ 어려움
+      일시 정지 비활성화
+      difficulty === 'hard'?
+      pause-btn.disabled = true
+  │ (전체 수렴)
   ▼
-게임 시작 버튼 클릭 → [다이어그램 2]로 이동
+게임 시작 버튼
+→ [다이어그램 2]로 이동
 ```
 
 ---
@@ -59,7 +77,7 @@ board[r][c] = {value: Math.ceil(Math.random()*9)}        │
   │                                                      │
   ▼                                                      │
 게임 오버 여부                                            │
-if(C.over()){ showGameOver(); Return                     │
+if(C.over()){ showGameOver(); Return}                    │
   │                                                      │
   ├─ True ──► 다시하기 버튼 클릭 ────────────────────────┘
   │           restart-btn.onClick
