@@ -120,47 +120,45 @@
 ## 다이어그램 3 — 아이템 흐름
 
 ```
-사과 제거 완료 (다이어그램 2에서 진입)
+아이템 클릭
   │
   ▼
-┌──────────────────────────────────────────────────────────┐
-│ [알고리즘 7] 아이템 스폰 판정                              │
-│ 10% 확률 → 제거 셀 중 랜덤 1칸 선택 → BOMB/CLOCK 결정    │
-│                                                          │
-│ if (Math.random() < 0.1) spawnItemIn(removedCells)       │
-│ const type = Math.random() < 0.5 ? 1 : 2                │
-└──────────────────────────────────────────────────────────┘
+보드 위 아이템 클릭 (isCliked)
+HUD 버튼 클릭 (isUsed)
   │
-  ├─ 아이템 생성 X (90%) → 종료
+  ├─ isCliked ──────────────────────────────────────────────┐
+  │      │                                                  │
+  │      ▼                                                  ▼
+  │    폭탄                                               시계
+  │    [[-1,0],[1,0],[0,-1],[0,1]].forEach               timeLeft += 5
+  │    board[r+dr][c+dc].removed = true
+  │      │
+  │      ▼
+  │    점수 추가
+  │    score += removed
   │
-  └─ 아이템 생성 O (10%)
-       │
-       ▼
-  isClicked = 보드 위 아이템 클릭
-  isUsed    = HUD 버튼(힌트/변환) 클릭
-       │
-       ▼
-  switch (type)
-       │
-       ├─ case 1 : 폭탄 💣
-       │   [알고리즘 5] 상하좌우 4칸 추가 제거
-       │   [[-1,0],[1,0],[0,-1],[0,1]].forEach
-       │   → board[r+dr][c+dc].removed = true
-       │   → score += 5
-       │
-       ├─ case 2 : 시계 ⏱️
-       │   [알고리즘 6] 남은 시간 5초 추가
-       │   → timeLeft += 5
-       │
-       ├─ case 힌트 : 돋보기 🔍
-       │   [알고리즘 8] 합 10인 인접 쌍 탐색 → 3초간 강조
-       │   board[r][c].value + board[r][c+1].value === 10
-       │   → hintActive = true; hintTimer = 3; itemCounts[0]--
-       │
-       └─ case 변환 : 숫자 변환 🔢
-           [알고리즘 9] 선택 셀 값을 1로 변경
-           isClicked = C.useChange(r, c)
-           → board[r][c].value = 1; itemCounts[1]--
+  └─ isUsed ────────────────────────────────────────────────┐
+         │                                                  │
+         ▼                                                  ▼
+       아이템 사용 가능 여부 확인                          아이템 사용 가능 여부 확인
+       if(itemCounts[0] <= 0) return 0                  if(itemCounts[1] <= 0) return 0
+         │ false                                           │ false
+         ▼                                                 ▼
+       돋보기                                           모드 실행 및 안내 문구 출력
+       board[r][c].value + board[r][c+1].value === 10   changeMode = true
+       hintActive = true                                document.getElementById
+         │                                               ('change-mode-banner')
+         ▼                                               .classList.remove('hidden')
+       아이템 개수 감소                                       │
+       itemCounts[0]--                                       ▼
+                                                        숫자 변환
+                                                        C.useChange(r, c)
+                                                        board[r][c].value = 1
+                                                        itemCounts[1]--
+                                                            │
+                                                            ▼
+                                                        아이템 개수 감소
+                                                        itemCounts[1]--
 ```
 
 ---
