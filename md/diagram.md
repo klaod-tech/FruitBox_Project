@@ -216,60 +216,65 @@ timeLeft === 0 ?
 ## 다이어그램 5 — 게임 종료 흐름
 
 ```
-gameOver = true 감지 (다이어그램 4에서 진입)
+제한 시간 완료
+timeLeft === 0
+gameOver = true
   │
   ▼
-┌──────────────────────────────────────────┐
-│ 타이머 · 렌더링 루프 정지                  │
-│ clearInterval(timerInterval)             │
-│ cancelAnimationFrame(rafId)              │
-└──────────────────────────────────────────┘
+루프 정지
+clearInterval(timerInterval)
+cancelAnimationFrame(rafId)
   │
   ▼
-┌──────────────────────────────────────────────────┐
-│ 최종 점수 · 최고 기록 표시                          │
-│ document.getElementById('final-score')            │
-│   .textContent = C.score()                        │
-│ document.getElementById('final-best')             │
-│   .textContent = C.best()                         │
-└──────────────────────────────────────────────────┘
+최종 점수 및 최고 점수 표시
+document.getElementById('final-score'), ('final-best')
+  .textContent = C.score(), C.best()
   │
   ▼
-score >= getBest(diff) ?
+저장 여부
+if(score >= this.getBest(diff)) ?
   │
-  ├─ True
-  │   localStorage.setItem(`fruitbox_best_${diff}`, score)
+  ├─ False ──► 저장 X
   │
-  └─ False
-      (기존 기록 유지, 저장 안 함)
-  │
-  ▼
-┌──────────────────────────────────────────────────────────┐
-│ 게임오버 화면 표시                                         │
-│ document.getElementById('gameover-screen')               │
-│   .classList.remove('hidden')                            │
-└──────────────────────────────────────────────────────────┘
+  └─ True
+       │
+       ▼
+  최고 점수 저장
+  localStorage.setItem(`fruitbox_best_${diff}`, score)
   │
   ▼
-┌──────────────────────────────────────────────────────────┐
-│ 티어 갱신                                                  │
-│ const tier = Store.getTier(Store.getBest(difficulty))    │
-│ document.getElementById('final-tier')                    │
-│   .textContent = tier.name                               │
-└──────────────────────────────────────────────────────────┘
+점수로 티어 판정
+switch(true)
+case score >= n : return {name: 'tier', color: 'color'}
+  │
+  ├─ score < 16  → 브론즈
+  │                default: return {name: '브론즈', color: '#cd7f32'}
+  │
+  ├─ score >= 31 → 골드
+  │                return {name: '골드', color: '#ffd700'}
+  │
+  └─ score >= 90 → 챌린저
+                   return {name: '챌린저', color: '#ff4444'}
+  │ (전체 case 수렴)
+  ▼
+티어 갱신
+document.getElementById('final-tier').textContent = tier.name
+  │
+  ▼
+게임 오버 화면 표시
+document.getElementById('gameover-screen').classList.remove('hidden')
   │
   ▼
 버튼 선택
+document.getElementById('restart-btn'), ('home-btn')
   │
-  ├─ 다시 시작 (restart-btn.onClick)
-  │   pauseCount = 0
-  │   cancelAnimationFrame(rafId)
+  ├─ 다시 시작 클릭 (restart-brn.onClick)
+  │   게임 진행 다이어그램 이동
   │   C.restart()
-  │   startTimer(); gameLoop()
   │   → [다이어그램 2]로 이동
   │
-  └─ 처음으로 (home-btn.onClick)
-      game-screen.classList.add('hidden')
+  └─ 처음으로 클릭 (home-btn.onClick)
+      게임 시작 다이어그램 이동
       start-screen.classList.remove('hidden')
       → [다이어그램 1]로 이동
 ```
