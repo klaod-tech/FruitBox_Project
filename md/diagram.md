@@ -216,50 +216,62 @@ timeLeft === 0 ?
 ## 다이어그램 5 — 게임 종료 흐름
 
 ```
-timeLeft = 0 감지 (다이어그램 4에서 진입)
+gameOver = true 감지 (다이어그램 4에서 진입)
+  │
+  ▼
+┌──────────────────────────────────────────┐
+│ 타이머 · 렌더링 루프 정지                  │
+│ clearInterval(timerInterval)             │
+│ cancelAnimationFrame(rafId)              │
+└──────────────────────────────────────────┘
+  │
+  ▼
+┌──────────────────────────────────────────────────┐
+│ 최종 점수 · 최고 기록 표시                          │
+│ document.getElementById('final-score')            │
+│   .textContent = C.score()                        │
+│ document.getElementById('final-best')             │
+│   .textContent = C.best()                         │
+└──────────────────────────────────────────────────┘
+  │
+  ▼
+score >= getBest(diff) ?
+  │
+  ├─ True
+  │   localStorage.setItem(`fruitbox_best_${diff}`, score)
+  │
+  └─ False
+      (기존 기록 유지, 저장 안 함)
   │
   ▼
 ┌──────────────────────────────────────────────────────────┐
-│ [알고리즘 15] 게임오버 판정                                │
-│ 타이머·렌더링 루프 정지, 최종 점수·기록 화면에 표시         │
-│                                                          │
-│ clearInterval(timerInterval)                             │
-│ cancelAnimationFrame(rafId)                              │
+│ 게임오버 화면 표시                                         │
+│ document.getElementById('gameover-screen')               │
+│   .classList.remove('hidden')                            │
 └──────────────────────────────────────────────────────────┘
   │
   ▼
-┌──────────────────────────────────────────────────────────────┐
-│ [알고리즘 17] localStorage 기록 저장                           │
-│ 현재 점수 >= 저장값이면 난이도별 키에 덮어쓰기                │
-│                                                              │
-│ if (score >= this.getBest(diff))                             │
-│   localStorage.setItem(`fruitbox_best_${diff}`, score)       │
-└──────────────────────────────────────────────────────────────┘
-  │
-  ▼
-┌──────────────────────────────────────────────────────────────┐
-│ [알고리즘 19] 티어 갱신                                        │
-│ 갱신된 최고 기록으로 티어 재판정 후 게임오버 화면에 표시       │
-│                                                              │
-│ const tier = Store.getTier(Store.getBest(difficulty))        │
-│ document.getElementById('final-tier').textContent = tier.name│
-└──────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│ 티어 갱신                                                  │
+│ const tier = Store.getTier(Store.getBest(difficulty))    │
+│ document.getElementById('final-tier')                    │
+│   .textContent = tier.name                               │
+└──────────────────────────────────────────────────────────┘
   │
   ▼
 버튼 선택
   │
-  ├─ 다시 시작
-  │     ▼
-  │   ┌──────────────────────────────────────────────────┐
-  │   │ [알고리즘 16] 재시작                              │
-  │   │ 모든 상태 초기화 후 타이머·렌더링 루프 재시작      │
-  │   │                                                  │
-  │   │ pauseCount = 0; cancelAnimationFrame(rafId)      │
-  │   │ startTimer(); gameLoop()                         │
-  │   └──────────────────────────────────────────────────┘
-  │     → [다이어그램 2]로 이동
+  ├─ 다시 시작 (restart-btn.onClick)
+  │   pauseCount = 0
+  │   cancelAnimationFrame(rafId)
+  │   C.restart()
+  │   startTimer(); gameLoop()
+  │   → [다이어그램 2]로 이동
   │
-  └─ 처음으로 → [다이어그램 1]로 이동
+  └─ 처음으로 (home-btn.onClick)
+      game-screen.classList.add('hidden')
+      start-screen.classList.remove('hidden')
+      → [다이어그램 1]로 이동
 ```
 
 ---
