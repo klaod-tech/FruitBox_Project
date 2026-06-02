@@ -50,69 +50,86 @@
 ## 다이어그램 2 — 게임 진행 루프
 
 ```
-게임 시작
+게임 시작  ◄─────────────────────────────────────────────┐
+  │                                                      │
+  ▼                                                      │
+보드 초기화                                               │
+170개 셀에 1~9 난수 배정                                  │
+board[r][c] = {value: Math.ceil(Math.random()*9)}        │
+  │                                                      │
+  ▼                                                      │
+게임 오버 여부                                            │
+if(C.over()){ showGameOver(); Return                     │
+  │                                                      │
+  ├─ True ──► 다시하기 버튼 클릭 ────────────────────────┘
+  │           restart-btn.onClick
+  │           C.restart()
   │
-  ▼
-┌────────────────────────────────────────────────────────┐
-│ [알고리즘 1] 보드 초기화                                 │
-│ 170개 셀에 1~9 난수 배정, 모든 상태 변수 초기화          │
-│                                                        │
-│ board[r][c] = { value: Math.ceil(Math.random()*9),     │
-│                 isItem: false, removed: false }         │
-└────────────────────────────────────────────────────────┘
-  │
-  ▼
-┌──────────────────────────────────────────────────────┐
-│ [알고리즘 11] 렌더링 루프 시작 (매 프레임 반복)          │
-│ 게임오버 감지 시 루프 종료                              │
-│                                                      │
-│ if (C.over()) { showGameOver(); return; }             │
-│ rafId = requestAnimationFrame(gameLoop);              │
-└──────────────────────────────────────────────────────┘
-  │
-  ▼
-┌──────────────────────────────────────────────────────┐
-│ [알고리즘 2] 드래그 선택                               │
-│ mousedown → 시작 좌표 기록 / mousemove → 끝 좌표 갱신  │
-│                                                      │
-│ drag = { active: true, r1: r, c1: c, r2: r, c2: c } │
-│ drag.r2 = r; drag.c2 = c;                            │
-└──────────────────────────────────────────────────────┘
-  │
-  ▼
-┌─────────────────────────────────────────────────────────────┐
-│ [알고리즘 10] 드래그 색깔 변경                               │
-│ 합 = 10 → 초록, 0 < 합 ≠ 10 → 빨강, 합 = 0 → 기본색        │
-│                                                             │
-│ sumEl.classList.toggle('match',   s === 10)                 │
-│ sumEl.classList.toggle('invalid', s > 0 && s !== 10)        │
-└─────────────────────────────────────────────────────────────┘
-  │
-  ▼
-┌───────────────────────────────────────────────────────────────┐
-│ [알고리즘 3] 합산 판정                                          │
-│ removed / isItem 셀 제외하고 합산, 10이 아니면 제거 중단        │
-│                                                               │
-│ if (!board[r][c].removed && !board[r][c].isItem) s += value   │
-│ if (s !== 10) return 0                                        │
-└───────────────────────────────────────────────────────────────┘
-  │ 합 = 10
-  ▼
-┌─────────────────────────────────────────────────────┐
-│ [알고리즘 4] 사과 제거                                │
-│ 셀 removed = true 처리 후 점수 반영                   │
-│                                                     │
-│ board[r][c].removed = true                          │
-│ score += removedCells.length                        │
-└─────────────────────────────────────────────────────┘
-  │
-  ├──► 10% 확률로 [다이어그램 3] 아이템 스폰 진행
-  │
-  ▼
-게임오버? ── Yes ──► [다이어그램 5]로 이동
-  │ No
-  ▼
-렌더링 루프로 복귀 (반복)
+  └─ False
+       │
+       ▼
+  게임 진행
+  rafId = requestAnimationFrame(gameLoop)
+       │
+       ▼
+  드래그 선택
+  drag = { active = true, r1: r, c1: c, r2: r, c2: c }
+       │
+       ▼
+  합계 10 여부
+  sumEl.classList.toggle('match', s === 10)
+  ('invalid', s > 0 && s !== 10)
+       │
+       ├─ 합계 != 10 ──► 합계칸 빨간색 변환
+       │                 sum-display.invalid
+       │                 {color: #e94560; font-weight: bold}
+       │
+       └─ 합계 = 10
+            │
+            ▼
+        합계칸 초록색 변환
+        sum-display.match
+        {color: #69f0ae; font-weight: bold}
+            │
+            ▼
+        사과 제거 여부
+        if(!board[r][c].removed && !board[r][c].isItem)
+        s += value
+            │
+            ├─ 합계 != 10 ──► 제거 거부
+            │                 if(s !== 10) return 0
+            │
+            └─ 합계 = 10
+                 │
+                 ▼
+             사과 제거
+             s === 10
+             board[r][c].removed = true
+                 │
+                 ▼
+             점수 반영
+             score += removedCells.length
+                 │
+                 ▼
+             사과 제거 시 아이템 10% 생성
+             Math.random() < 0.1
+             spawnItemIn(removedCells)
+                 │
+                 ├─ 아이템 생성 X ──► 제거된 칸 검은색 렌더링
+                 │                   if(removed)
+                 │                   {ctx.fillStyle = COLOR.removed}
+                 │
+                 └─ 아이템 생성 O
+                      │
+                      ▼
+                  폭탄 / 시계
+                  Math.random() < 0.5  → 폭탄
+                  Math.random() >= 0.5 → 시계
+                      │
+                      ▼ (클릭 시)
+                  제거된 칸 검은색 렌더링
+                  if(removed)
+                  {ctx.fillStyle = COLOR.removed}
 ```
 
 ---
@@ -120,45 +137,47 @@
 ## 다이어그램 3 — 아이템 흐름
 
 ```
-아이템 클릭
+사과 제거 완료 (다이어그램 2에서 진입)
   │
   ▼
-보드 위 아이템 클릭 (isCliked)
-HUD 버튼 클릭 (isUsed)
+┌──────────────────────────────────────────────────────────┐
+│ [알고리즘 7] 아이템 스폰 판정                              │
+│ 10% 확률 → 제거 셀 중 랜덤 1칸 선택 → BOMB/CLOCK 결정    │
+│                                                          │
+│ if (Math.random() < 0.1) spawnItemIn(removedCells)       │
+│ const type = Math.random() < 0.5 ? 1 : 2                │
+└──────────────────────────────────────────────────────────┘
   │
-  ├─ isCliked ──────────────────────────────────────────────┐
-  │      │                                                  │
-  │      ▼                                                  ▼
-  │    폭탄                                               시계
-  │    [[-1,0],[1,0],[0,-1],[0,1]].forEach               timeLeft += 5
-  │    board[r+dr][c+dc].removed = true
-  │      │
-  │      ▼
-  │    점수 추가
-  │    score += removed
+  ├─ 아이템 생성 X (90%) → 종료
   │
-  └─ isUsed ────────────────────────────────────────────────┐
-         │                                                  │
-         ▼                                                  ▼
-       아이템 사용 가능 여부 확인                          아이템 사용 가능 여부 확인
-       if(itemCounts[0] <= 0) return 0                  if(itemCounts[1] <= 0) return 0
-         │ false                                           │ false
-         ▼                                                 ▼
-       돋보기                                           모드 실행 및 안내 문구 출력
-       board[r][c].value + board[r][c+1].value === 10   changeMode = true
-       hintActive = true                                document.getElementById
-         │                                               ('change-mode-banner')
-         ▼                                               .classList.remove('hidden')
-       아이템 개수 감소                                       │
-       itemCounts[0]--                                       ▼
-                                                        숫자 변환
-                                                        C.useChange(r, c)
-                                                        board[r][c].value = 1
-                                                        itemCounts[1]--
-                                                            │
-                                                            ▼
-                                                        아이템 개수 감소
-                                                        itemCounts[1]--
+  └─ 아이템 생성 O (10%)
+       │
+       ▼
+  isClicked = 보드 위 아이템 클릭
+  isUsed    = HUD 버튼(힌트/변환) 클릭
+       │
+       ▼
+  switch (type)
+       │
+       ├─ case 1 : 폭탄 💣
+       │   [알고리즘 5] 상하좌우 4칸 추가 제거
+       │   [[-1,0],[1,0],[0,-1],[0,1]].forEach
+       │   → board[r+dr][c+dc].removed = true
+       │   → score += 5
+       │
+       ├─ case 2 : 시계 ⏱️
+       │   [알고리즘 6] 남은 시간 5초 추가
+       │   → timeLeft += 5
+       │
+       ├─ case 힌트 : 돋보기 🔍
+       │   [알고리즘 8] 합 10인 인접 쌍 탐색 → 3초간 강조
+       │   board[r][c].value + board[r][c+1].value === 10
+       │   → hintActive = true; hintTimer = 3; itemCounts[0]--
+       │
+       └─ case 변환 : 숫자 변환 🔢
+           [알고리즘 9] 선택 셀 값을 1로 변경
+           isClicked = C.useChange(r, c)
+           → board[r][c].value = 1; itemCounts[1]--
 ```
 
 ---
