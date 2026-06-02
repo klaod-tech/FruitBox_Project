@@ -202,37 +202,13 @@
 timeLeft === 0 ?
   │
   ├─ Yes ──► gameOver = true
-  │          Store.saveBest(difficulty, score)
+  │          score >= getBest(diff) ?
+  │          ├─ True  → localStorage.setItem(`fruitbox_best_${diff}`, score)
+  │          └─ False → (기존 기록 유지)
   │          → [다이어그램 5]로 이동
   │
-  └─ No  ──► 일시정지 버튼 클릭?
-                  │
-                  ├─ No → 1초 후 틱 반복 (처음으로)
-                  │
-                  └─ Yes
-                       │
-                       ▼
-              ┌────────────────────────────────────────────────────┐
-              │ [알고리즘 14] 난이도별 일시정지 처리                  │
-              └────────────────────────────────────────────────────┘
-                       │
-                       ▼
-              switch (difficulty)
-                       │
-                       ├─ 'hard'
-                       │   → return  (버튼 disabled, 실행 안 됨)
-                       │
-                       ├─ 'normal'
-                       │   if (pauseCount >= 5) return  (5회 초과 차단)
-                       │   pauseCount++
-                       │   setInterval 10초 카운트다운 시작
-                       │   document.getElementById('pause-btn')
-                       │     .textContent = `▶ 재개 (${remain}s) [${pauseCount}/5]`
-                       │   if (remain <= 0) resumeGame()
-                       │
-                       └─ 'easy'
-                           → C.pause()  (제한 없이 일시정지)
-                             pause-btn.textContent = '▶ 재개'
+  └─ No  ──► tick 종료 후 1초 뒤 반복 (처음으로)
+             (일시정지는 [다이어그램 6] 참고)
 ```
 
 ---
@@ -304,4 +280,52 @@ timeLeft = 0 감지 (다이어그램 4에서 진입)
 [다이어그램 5] 게임 종료 흐름                       │
         │                                         │
         └──────── 재시작 ──────────────────────────┘
+
+        [다이어그램 6] 일시정지 흐름 (독립 이벤트)
+```
+
+---
+
+## 다이어그램 6 — 일시정지 흐름
+
+pause 버튼 클릭 시 독립적으로 실행되는 이벤트 리스너입니다.
+
+```
+pause-btn 클릭
+  │
+  ▼
+┌──────────────────────────────────────────┐
+│ 현재 일시정지 상태 확인                    │
+│ isPaused = C.paused()                    │
+└──────────────────────────────────────────┘
+  │
+  ▼
+isPaused ?
+  │
+  ├─ True (현재 정지 중)
+  │   clearInterval(pauseTimer)
+  │   C.pause()
+  │   pause-btn.textContent = '⏸ 일시정지'
+  │
+  └─ False (게임 진행 중)
+       │
+       ▼
+  switch (difficulty)
+       │
+       ├─ 'hard'
+       │   → return  (버튼 disabled, 실행 안 됨)
+       │
+       ├─ 'normal'
+       │   pauseCount >= 5 ?
+       │   ├─ True  → return  (횟수 초과)
+       │   └─ False
+       │        pauseCount++
+       │        setInterval 카운트다운 시작
+       │        remain = 10 - pauseSeconds
+       │        pause-btn.textContent = `▶ 재개 (${remain}s) [${pauseCount}/5]`
+       │        if (remain <= 0) resumeGame()
+       │
+       └─ 'easy'
+           C.pause()
+           pause-btn.textContent = '▶ 재개'
 ```
