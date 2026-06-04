@@ -57,39 +57,6 @@ body {
 
 .highlight { color: #f5a623; font-weight: bold; }
 
-/* 난이도 선택 */
-.difficulty-label {
-    font-size: 0.85rem;
-    color: #aaa;
-    margin-bottom: 8px;
-    text-align: left;
-}
-.difficulty-btns {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-.diff-btn {
-    flex: 1;
-    padding: 8px 0;
-    background: #0f3460;
-    color: #ccc;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-.diff-btn:hover  { border-color: #4fc3f7; color: #fff; }
-.diff-btn.active { border-color: #f5a623; color: #f5a623; background: #1a3a60; }
-.diff-desc {
-    font-size: 0.8rem;
-    color: #888;
-    margin-bottom: 20px;
-    text-align: center;
-    min-height: 18px;
-}
-
 .rules {
     background: #0f3460;
     border-radius: 10px;
@@ -120,6 +87,25 @@ body {
 }
 #start-btn:hover  { background: #c73652; transform: scale(1.04); }
 #start-btn:active { transform: scale(0.97); }
+
+/* 난이도 선택 */
+.diff-section   { margin: 16px 0 8px; }
+.diff-label     { color: #aaa; font-size: 0.85rem; margin-bottom: 8px; }
+.diff-buttons   { display: flex; gap: 10px; justify-content: center; }
+.diff-btn {
+    padding: 7px 20px;
+    border: 2px solid #1a3a5c;
+    border-radius: 8px;
+    background: #0d1b2a;
+    color: #aaa;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.diff-btn:hover  { border-color: #e94560; color: #fff; }
+.diff-btn.active { border-color: #e94560; background: #e94560; color: #fff; font-weight: bold; }
+.diff-desc  { color: #69f0ae; font-size: 0.8rem; margin-top: 8px; min-height: 1.2em; }
+.start-tier { color: #ffd700; font-size: 0.9rem; margin-bottom: 10px; min-height: 1.2em; }
 
 /* ─────────────────────────────────────
  * 게임 화면 전체 레이아웃
@@ -156,7 +142,13 @@ body {
     flex-wrap: wrap;
 }
 
-.hud-right button { min-width: 90px; }
+.hud-right button {
+    min-width: 110px;
+    padding: 8px 12px;
+    height: 40px;
+    line-height: 1.2;
+    text-align: center;
+}
 
 .hud-center { font-size: 1.2rem; font-weight: bold; }
 
@@ -202,9 +194,8 @@ button:active { transform: scale(0.96); }
 }
 .item-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-#pause-btn    { background: #2d6a4f; color: #d8f3dc; border: 1px solid #52b788; }
-#reset-btn    { background: #5c3317; color: #ffd6a5; border: 1px solid #9c6644; }
-#hud-home-btn { background: #3a3a5c; color: #aaa;    border: 1px solid #5a5a8c; min-width: 44px; }
+#pause-btn  { background: #2d6a4f; color: #d8f3dc; }
+#reset-btn  { background: #5c3317; color: #ffd6a5; }
 
 /* ─────────────────────────────────────
  * 선택 합계 표시
@@ -217,7 +208,7 @@ button:active { transform: scale(0.96); }
     border-radius: 20px;
     color: #ccc;
 }
-#sum-display.match   { color: #69f0ae; font-weight: bold; }
+#sum-display.match { color: #69f0ae; font-weight: bold; }
 #sum-display.invalid { color: #e94560; font-weight: bold; }
 
 /* ─────────────────────────────────────
@@ -236,13 +227,17 @@ button:active { transform: scale(0.96); }
  * 숫자 변환 모드 배너
  * ───────────────────────────────────── */
 #change-mode-banner {
-    margin-top: 6px;
+    position: fixed;
+    bottom: 300px;
+    left: 50%;
+    transform: translateX(-50%);
     background: #f5a623;
     color: #1a1a2e;
     font-weight: bold;
     font-size: 0.95rem;
     padding: 8px 24px;
     border-radius: 20px;
+    z-index: 100;
     box-shadow: 0 2px 12px rgba(245,166,35,0.5);
 }
 
@@ -267,24 +262,7 @@ button:active { transform: scale(0.96); }
     text-align: center;
     box-shadow: 0 0 30px rgba(79,195,247,0.3);
 }
-.overlay-box h2 { font-size: 1.8rem; margin-bottom: 12px; color: #4fc3f7; }
-
-.pause-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 18px;
-}
-#pause-count-display {
-    font-size: 0.95rem;
-    color: #f5a623;
-}
-#pause-time-display {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #e94560;
-}
+.overlay-box h2 { font-size: 1.8rem; margin-bottom: 20px; color: #4fc3f7; }
 
 #resume-btn {
     background: #4fc3f7;
@@ -334,17 +312,3 @@ button:active { transform: scale(0.96); }
 }
 #restart-btn { background: #e94560; color: white; }
 #home-btn    { background: #0f3460; color: #4fc3f7; }
-
-.tier-display {
-    font-size: 1.1rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    min-height: 1.4em;
-}
-
-#final-tier {
-    font-size: 1.1rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
