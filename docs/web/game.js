@@ -12,10 +12,11 @@
 /* ─────────────────────────────────────
  * 캔버스 & 셀 크기 설정
  * ───────────────────────────────────── */
-const ROWS = 10;
-const COLS = 17;
-const CELL = 50;   /* 셀 크기 (px) */
-const PAD  = 4;    /* 셀 내부 여백 */
+const ROWS       = 10;
+const COLS       = 17;
+const CELL       = 50;   /* 셀 크기 (px) */
+const PAD        = 4;    /* 셀 내부 여백 */
+const TARGET_SUM = 10;   /* 제거 조건 합계 */
 
 const canvas  = document.getElementById('game-canvas');
 const ctx     = canvas.getContext('2d');
@@ -48,6 +49,53 @@ let drag = { active: false, r1: 0, c1: 0, r2: 0, c2: 0 };
 
 /* 숫자 변환 모드 */
 let changeMode = false;
+
+/* ─────────────────────────────────────
+ * 난이도 설정
+ * ───────────────────────────────────── */
+let difficulty   = 'easy';
+let pauseCount   = 0;
+let pauseTimer   = null;
+let pauseSeconds = 0;
+
+const DIFF_DESC = {
+    easy:   '일시정지 제한 없음',
+    normal: '일시정지 최대 5회 / 1회당 최대 10초',
+    hard:   '일시정지 불가',
+};
+
+/* ─────────────────────────────────────
+ * 로컬 저장소
+ * ───────────────────────────────────── */
+const Store = {
+    getDeviceId() {
+        let id = localStorage.getItem('fruitbox_device_id');
+        if (!id) {
+            id = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+            localStorage.setItem('fruitbox_device_id', id);
+        }
+        return id;
+    },
+    getBest(diff) {
+        return parseInt(localStorage.getItem(`fruitbox_best_${diff}`) || '0', 10);
+    },
+    saveBest(diff, score) {
+        if (score >= this.getBest(diff))
+            localStorage.setItem(`fruitbox_best_${diff}`, score);
+    },
+    getTier(score) {
+        switch (true) {
+            case score >= 90: return { name: '챌린저', color: '#ff4444' };
+            case score >= 76: return { name: '마스터',  color: '#e040fb' };
+            case score >= 61: return { name: '다이아',  color: '#4fc3f7' };
+            case score >= 46: return { name: '플레',    color: '#00e5ff' };
+            case score >= 31: return { name: '골드',    color: '#ffd700' };
+            case score >= 16: return { name: '실버',    color: '#c0c0c0' };
+            default:          return { name: '브론즈',  color: '#cd7f32' };
+        }
+    },
+};
 
 /* ─────────────────────────────────────
  * WASM 모듈 래퍼
@@ -235,6 +283,58 @@ const C = {
 };
 
 /* ─────────────────────────────────────
+ * 사과 그리기
+ * ───────────────────────────────────── */
+function drawApple(x, y, size, number) {
+    const cx = x + size / 2;
+    const cy = y + size / 2 + size * 0.03;
+    const r  = size * 0.38;
+
+    ctx.save();
+
+    /* 사과 몸통 */
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#e8281e';
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur  = 4;
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+
+    /* 광택 */
+    ctx.beginPath();
+    ctx.ellipse(cx - r * 0.25, cy - r * 0.3, r * 0.22, r * 0.14, -Math.PI / 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fill();
+
+    /* 줄기 */
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r);
+    ctx.quadraticCurveTo(cx + r * 0.3, cy - r - size * 0.14, cx + r * 0.15, cy - r - size * 0.18);
+    ctx.strokeStyle = '#5c3317';
+    ctx.lineWidth   = size * 0.05;
+    ctx.lineCap     = 'round';
+    ctx.stroke();
+
+    /* 잎 */
+    ctx.beginPath();
+    ctx.ellipse(cx + r * 0.2, cy - r - size * 0.1, r * 0.22, r * 0.1, -Math.PI / 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#4caf50';
+    ctx.fill();
+
+    /* 숫자 */
+    ctx.fillStyle    = 'white';
+    ctx.font         = `bold ${size * 0.42}px Segoe UI Mono`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor  = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur   = 3;
+    ctx.fillText(number, cx, cy + r * 0.05);
+
+    ctx.restore();
+}
+
+/* ─────────────────────────────────────
  * Canvas 렌더링
  * ───────────────────────────────────── */
 function drawCell(r, c) {
@@ -283,7 +383,7 @@ function drawCell(r, c) {
     ctx.lineWidth = isSelected || isHint ? 2 : 1;
     ctx.strokeRect(x+0.5, y+0.5, CELL-1, CELL-1);
 
-    /* 아이템 또는 숫자 */
+    /* 아이템 또는 사과 */
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
 
@@ -294,9 +394,7 @@ function drawCell(r, c) {
         ctx.font = `bold ${CELL*0.38}px Segoe UI`;
         ctx.fillText(labels[iType] || '?', x + CELL/2, y + CELL/2);
     } else {
-        ctx.fillStyle = COLOR.numColors[(val-1) % COLOR.numColors.length];
-        ctx.font = `bold ${CELL*0.44}px Segoe UI Mono`;
-        ctx.fillText(val, x + CELL/2, y + CELL/2);
+        drawApple(x, y, CELL, val);
     }
 }
 
@@ -452,7 +550,31 @@ function showGameOver() {
 /* ─────────────────────────────────────
  * 버튼 이벤트
  * ───────────────────────────────────── */
+/* 난이도 버튼 */
+document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        difficulty = btn.dataset.diff;
+        document.getElementById('diff-desc').textContent = DIFF_DESC[difficulty];
+        updateStartTier();
+    });
+});
+
+function updateStartTier() {
+    const best = Store.getBest(difficulty);
+    const tier = Store.getTier(best);
+    const el   = document.getElementById('start-tier');
+    el.textContent = best > 0 ? `${tier.name}  (최고: ${best}점)` : '';
+    el.style.color = tier.color;
+}
+
 document.getElementById('start-btn').addEventListener('click', () => {
+    pauseCount = 0; pauseSeconds = 0;
+    clearInterval(pauseTimer);
+    const pauseBtn = document.getElementById('pause-btn');
+    pauseBtn.disabled = (difficulty === 'hard');
+    pauseBtn.textContent = '⏸ 일시정지';
     C.init();
     showGame();
     startTimer();
@@ -464,6 +586,11 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     C.restart();
     drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
     changeMode = false;
+    pauseCount = 0; pauseSeconds = 0;
+    clearInterval(pauseTimer);
+    const pauseBtn = document.getElementById('pause-btn');
+    pauseBtn.disabled = (difficulty === 'hard');
+    pauseBtn.textContent = '⏸ 일시정지';
     startTimer();
     gameLoop();
 });
@@ -474,19 +601,46 @@ document.getElementById('home-btn').addEventListener('click', () => {
     document.getElementById('gameover-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.add('hidden');
     document.getElementById('start-screen').classList.remove('hidden');
+    updateStartTier();
 });
 
-document.getElementById('pause-btn').addEventListener('click', () => {
+function resumeGame() {
+    clearInterval(pauseTimer);
+    pauseSeconds = 0;
     C.pause();
+    document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+}
+
+document.getElementById('pause-btn').addEventListener('click', () => {
     const isPaused = C.paused();
-    document.getElementById('pause-overlay').classList.toggle('hidden', !isPaused);
-    document.getElementById('pause-btn').textContent = isPaused ? '▶ 재개' : '⏸ 일시정지';
+    if (!isPaused) {
+        switch (difficulty) {
+            case 'hard': return;
+            case 'normal':
+                if (pauseCount >= 5) return;
+                pauseCount++; pauseSeconds = 0;
+                pauseTimer = setInterval(() => {
+                    pauseSeconds++;
+                    const remain = 10 - pauseSeconds;
+                    document.getElementById('pause-btn').textContent =
+                        `▶ 재개 (${remain}s) [${pauseCount}/5]`;
+                    if (remain <= 0) resumeGame();
+                }, 1000);
+                document.getElementById('pause-btn').textContent =
+                    `▶ 재개 (10s) [${pauseCount}/5]`;
+                break;
+            case 'easy':
+                document.getElementById('pause-btn').textContent = '▶ 재개';
+                break;
+        }
+        C.pause();
+    } else {
+        resumeGame();
+    }
 });
 
 document.getElementById('resume-btn').addEventListener('click', () => {
-    C.pause();
-    document.getElementById('pause-overlay').classList.add('hidden');
-    document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+    resumeGame();
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
@@ -509,8 +663,67 @@ document.getElementById('change-btn').addEventListener('click', () => {
 });
 
 /* ─────────────────────────────────────
+ * 키보드 단축키
+ *   P : 일시정지 / 재개
+ *   Q : 첫 화면으로 복귀
+ *   W : 숫자 변환 아이템 사용
+ *   E : 돋보기 아이템 사용
+ *   R : 보드 재시작
+ * ───────────────────────────────────── */
+document.addEventListener('keydown', (e) => {
+    if (document.getElementById('game-screen').classList.contains('hidden')) return;
+
+    switch (e.key.toUpperCase()) {
+        case 'P':
+            document.getElementById('pause-btn').click();
+            break;
+
+        case 'E':
+            if (!C.over() && !C.paused()) C.useHint();
+            break;
+
+        case 'W':
+            if (!C.over() && !C.paused() && C.itemCount(1) > 0) {
+                changeMode = !changeMode;
+                document.getElementById('change-mode-banner').classList.toggle('hidden', !changeMode);
+            }
+            break;
+
+        case 'Q':
+            clearInterval(timerInterval);
+            clearInterval(pauseTimer);
+            cancelAnimationFrame(rafId);
+            drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
+            changeMode = false;
+            document.getElementById('change-mode-banner').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            updateStartTier();
+            break;
+
+        case 'R':
+            C.restart();
+            drag = { active: false, r1:0, c1:0, r2:0, c2:0 };
+            changeMode = false;
+            pauseCount = 0; pauseSeconds = 0;
+            clearInterval(pauseTimer);
+            clearInterval(timerInterval);
+            cancelAnimationFrame(rafId);
+            document.getElementById('change-mode-banner').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('pause-btn').disabled = (difficulty === 'hard');
+            document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+            startTimer();
+            gameLoop();
+            break;
+    }
+});
+
+/* ─────────────────────────────────────
  * 초기화: WASM 로드
  * ───────────────────────────────────── */
 loadWasm().then((isWasm) => {
     console.log(isWasm ? 'WASM 모드로 실행' : 'Mock 모드로 실행 (WASM 없음)');
+    updateStartTier();
 });
