@@ -298,6 +298,12 @@ button:active { transform: scale(0.96); }
     margin-bottom: 16px;
     letter-spacing: 3px;
 }
+.final-tier {
+    font-size: 1.6rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
 .gameover-box p {
     font-size: 1.2rem;
     margin-bottom: 8px;

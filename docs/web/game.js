@@ -549,8 +549,20 @@ function showGame() {
 function showGameOver() {
     clearInterval(timerInterval);
     cancelAnimationFrame(rafId);
-    document.getElementById('final-score').textContent = C.score();
-    document.getElementById('final-best').textContent  = C.best();
+
+    const score = C.score();
+    Store.saveBest(difficulty, score);
+
+    const best = Store.getBest(difficulty);
+    const tier = Store.getTier(score);
+
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('final-best').textContent  = best;
+
+    const tierEl = document.getElementById('final-tier');
+    tierEl.textContent = tier.name;
+    tierEl.style.color = tier.color;
+
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
