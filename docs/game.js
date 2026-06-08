@@ -98,6 +98,175 @@ const Store = {
 };
 
 /* ─────────────────────────────────────
+ * 티어 엠블럼 생성 (Canvas API)
+ * ───────────────────────────────────── */
+const TIER_STYLE = {
+    '브론즈': { main:'#cd7f32', dark:'#7a3f10', light:'#e8a060', rim:'#a0622a' },
+    '실버':   { main:'#b0b8c8', dark:'#6a7280', light:'#dde4f0', rim:'#8a9aaa' },
+    '골드':   { main:'#ffd700', dark:'#a07800', light:'#fff176', rim:'#c8a000' },
+    '플레':   { main:'#00d4e8', dark:'#007a90', light:'#80eef8', rim:'#00a8bc' },
+    '다이아': { main:'#58c8f8', dark:'#0260a8', light:'#b8e8fc', rim:'#2090d0' },
+    '마스터': { main:'#d050f0', dark:'#7010a0', light:'#f0a0ff', rim:'#a030c8' },
+    '챌린저': { main:'#ff3030', dark:'#a00000', light:'#ff8888', rim:'#cc2020' },
+};
+
+function createTierEmblem(tierName, size) {
+    size = size || 80;
+    const oc = document.createElement('canvas');
+    oc.width = oc.height = size;
+    const c = oc.getContext('2d');
+    const h = size / 2;
+    const s = size / 80;
+    const st = TIER_STYLE[tierName];
+    if (!st) return oc;
+
+    c.save();
+    c.translate(h, h);
+
+    /* ── 날개 ── */
+    const wingCount = { '브론즈':1, '실버':2, '골드':2, '플레':3, '다이아':3, '마스터':4, '챌린저':4 };
+    const wc = wingCount[tierName] || 2;
+
+    for (let side = -1; side <= 1; side += 2) {
+        for (let i = 0; i < wc; i++) {
+            const wy = -8*s + i * 6 * s;
+            const wx = (18 + i * 7) * s * side;
+            const wa = (1.2 + i * 0.3) * s;
+            const wb = (4 + i * 1.5) * s;
+            c.save();
+            c.translate(wx, wy);
+            c.rotate(side * (0.25 + i * 0.15));
+            c.beginPath();
+            c.ellipse(0, 0, wa, wb, 0, 0, Math.PI * 2);
+            const wg = c.createLinearGradient(-wa, 0, wa, 0);
+            wg.addColorStop(0, side < 0 ? st.light : st.dark);
+            wg.addColorStop(1, side < 0 ? st.dark  : st.light);
+            c.fillStyle = wg;
+            c.fill();
+            c.strokeStyle = st.rim;
+            c.lineWidth = 0.8 * s;
+            c.stroke();
+            c.restore();
+        }
+    }
+
+    /* ── 방패 몸체 ── */
+    const sw = 22 * s, sh = 26 * s;
+    c.beginPath();
+    c.moveTo(0, -sh);
+    c.bezierCurveTo( sw, -sh,  sw,  0,  sw,  4*s);
+    c.bezierCurveTo( sw,  14*s, 0,  sh,  0,  sh);
+    c.bezierCurveTo(-sw,  sh, -sw,  14*s, -sw, 4*s);
+    c.bezierCurveTo(-sw,  0, -sw, -sh,  0, -sh);
+    c.closePath();
+
+    const sg = c.createRadialGradient(-6*s, -10*s, 2*s, 0, 0, sw * 1.4);
+    sg.addColorStop(0, st.light);
+    sg.addColorStop(0.5, st.main);
+    sg.addColorStop(1, st.dark);
+    c.fillStyle = sg;
+    c.shadowColor = 'rgba(0,0,0,0.5)';
+    c.shadowBlur = 6 * s;
+    c.fill();
+    c.shadowBlur = 0;
+    c.strokeStyle = st.rim;
+    c.lineWidth = 1.8 * s;
+    c.stroke();
+
+    /* ── 상단 장식 ── */
+    if (tierName === '마스터' || tierName === '챌린저') {
+        const crownH = 10 * s;
+        const crownW = 14 * s;
+        const pts = tierName === '챌린저' ? 5 : 3;
+        c.beginPath();
+        c.moveTo(-crownW, -sh + 4*s);
+        for (let i = 0; i <= pts; i++) {
+            const px = -crownW + (crownW * 2 / pts) * i;
+            const py = i % 2 === 0 ? -sh - crownH + 4*s : -sh + 2*s;
+            c.lineTo(px, py);
+        }
+        c.lineTo(crownW, -sh + 4*s);
+        c.closePath();
+        c.fillStyle = tierName === '챌린저' ? '#ffd700' : '#d050f0';
+        c.fill();
+        c.strokeStyle = tierName === '챌린저' ? '#c8a000' : '#a030c8';
+        c.lineWidth = 1.2 * s;
+        c.stroke();
+    } else {
+        c.beginPath();
+        c.moveTo(-8*s, -sh);
+        c.lineTo(0, -(sh + 10*s));
+        c.lineTo(8*s, -sh);
+        c.closePath();
+        c.fillStyle = st.main;
+        c.strokeStyle = st.rim;
+        c.lineWidth = 1.2 * s;
+        c.fill();
+        c.stroke();
+    }
+
+    /* ── 중앙 보석 ── */
+    const gemShapes = { '브론즈':'circle', '실버':'star4', '골드':'star6',
+                        '플레':'diamond', '다이아':'crystal', '마스터':'oval', '챌린저':'star5' };
+    const gemShape = gemShapes[tierName] || 'circle';
+    const gr = 8 * s;
+
+    c.save();
+    c.translate(0, -2 * s);
+
+    if (gemShape === 'circle') {
+        c.beginPath(); c.arc(0, 0, gr, 0, Math.PI * 2);
+    } else if (gemShape === 'oval') {
+        c.beginPath(); c.ellipse(0, 0, gr, gr * 0.7, 0, 0, Math.PI * 2);
+    } else if (gemShape === 'diamond' || gemShape === 'crystal') {
+        const gw = gemShape === 'crystal' ? gr * 0.8 : gr * 0.7;
+        c.beginPath();
+        c.moveTo(0, -gr); c.lineTo(gw, 0);
+        c.lineTo(0, gr);  c.lineTo(-gw, 0);
+        c.closePath();
+    } else if (gemShape === 'star4' || gemShape === 'star5' || gemShape === 'star6') {
+        const pts2 = gemShape === 'star4' ? 4 : gemShape === 'star5' ? 5 : 6;
+        c.beginPath();
+        for (let i = 0; i < pts2 * 2; i++) {
+            const ang = (Math.PI * 2 / (pts2 * 2)) * i - Math.PI / 2;
+            const r2 = i % 2 === 0 ? gr : gr * 0.45;
+            i === 0 ? c.moveTo(Math.cos(ang)*r2, Math.sin(ang)*r2)
+                    : c.lineTo(Math.cos(ang)*r2, Math.sin(ang)*r2);
+        }
+        c.closePath();
+    }
+
+    const gg = c.createRadialGradient(-gr*0.3, -gr*0.3, gr*0.1, 0, 0, gr);
+    gg.addColorStop(0, 'rgba(255,255,255,0.9)');
+    gg.addColorStop(0.4, st.light);
+    gg.addColorStop(1, st.main);
+    c.fillStyle = gg;
+    c.shadowColor = st.main;
+    c.shadowBlur = 5 * s;
+    c.fill();
+    c.shadowBlur = 0;
+    c.strokeStyle = st.rim;
+    c.lineWidth = 1.2 * s;
+    c.stroke();
+
+    c.beginPath();
+    c.ellipse(-gr*0.25, -gr*0.3, gr*0.25, gr*0.15, -Math.PI/4, 0, Math.PI*2);
+    c.fillStyle = 'rgba(255,255,255,0.55)';
+    c.fill();
+    c.restore();
+
+    c.restore();
+    return oc;
+}
+
+const TIER_EMBLEMS = {};
+function preloadTierEmblems() {
+    ['브론즈','실버','골드','플레','다이아','마스터','챌린저'].forEach(name => {
+        TIER_EMBLEMS[name] = createTierEmblem(name, 80);
+    });
+}
+
+/* ─────────────────────────────────────
  * WASM 모듈 래퍼
  *   Emscripten 빌드 전에는 Mock으로 동작
  *   빌드 후 game_core.js 로드 시 자동으로 실제 WASM 사용
@@ -560,8 +729,11 @@ function showGameOver() {
     document.getElementById('final-best').textContent  = best;
 
     const tierEl = document.getElementById('final-tier');
-    tierEl.textContent = tier.name;
-    tierEl.style.color = tier.color;
+    const emblem = TIER_EMBLEMS[tier.name];
+    const imgSrc = emblem ? emblem.toDataURL() : '';
+    tierEl.innerHTML = `
+        <img src="${imgSrc}" style="width:64px;height:64px;vertical-align:middle;margin-bottom:4px;"><br>
+        <span style="color:${tier.color}">${tier.name}</span>`;
 
     document.getElementById('gameover-screen').classList.remove('hidden');
 }
@@ -584,8 +756,16 @@ function updateStartTier() {
     const best = Store.getBest(difficulty);
     const tier = Store.getTier(best);
     const el   = document.getElementById('start-tier');
-    el.textContent = best > 0 ? `${tier.name}  (최고: ${best}점)` : '';
-    el.style.color = tier.color;
+    if (best > 0) {
+        const emblem = TIER_EMBLEMS[tier.name];
+        const imgSrc = emblem ? emblem.toDataURL() : '';
+        el.innerHTML = `
+            <img src="${imgSrc}" style="width:52px;height:52px;vertical-align:middle;margin-right:8px;">
+            <span style="color:${tier.color};font-weight:bold;font-size:1.3rem;">${tier.name}</span>
+            <span style="font-size:0.85rem;color:#aaa;margin-left:6px;">(최고: ${best}점)</span>`;
+    } else {
+        el.innerHTML = '<span style="color:#555;font-size:0.9rem;">기록 없음</span>';
+    }
 }
 
 document.getElementById('start-btn').addEventListener('click', () => {
@@ -744,5 +924,6 @@ document.addEventListener('keydown', (e) => {
  * ───────────────────────────────────── */
 loadWasm().then((isWasm) => {
     console.log(isWasm ? 'WASM 모드로 실행' : 'Mock 모드로 실행 (WASM 없음)');
+    preloadTierEmblems();
     updateStartTier();
 });
